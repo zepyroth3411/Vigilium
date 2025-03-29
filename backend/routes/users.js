@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express') 
 const router = express.Router()
 const db = require('../db')
 const jwt = require('jsonwebtoken')
@@ -20,19 +20,25 @@ function verificarAdmin(req, res, next) {
   }
 }
 
-// GET /api/usuarios → Lista de usuarios (solo admin)
+// ✅ GET /api/usuarios → Lista de usuarios con JOIN a roles
 router.get('/usuarios', verificarAdmin, (req, res) => {
-  db.query('SELECT id_usuario, nombre, rol FROM usuarios', (err, results) => {
+  const query = `
+    SELECT u.id_usuario, u.nombre, r.nombre AS rol
+    FROM usuarios u
+    LEFT JOIN roles r ON u.rol_id = r.id
+  `
+
+  db.query(query, (err, results) => {
     if (err) return res.status(500).json({ message: 'Error al obtener usuarios' })
     res.json(results)
   })
 })
 
-// POST /api/usuarios → Crear nuevo usuario (solo admin)
+// ✅ POST /api/usuarios → Crear nuevo usuario con rol_id
 router.post('/usuarios', verificarAdmin, async (req, res) => {
-  const { id_usuario, nombre, password, rol } = req.body
+  const { id_usuario, nombre, password, rol_id } = req.body
 
-  if (!id_usuario || !nombre || !password || !rol) {
+  if (!id_usuario || !nombre || !password || !rol_id) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios' })
   }
 
@@ -46,9 +52,9 @@ router.post('/usuarios', verificarAdmin, async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10)
 
       db.query(
-        'INSERT INTO usuarios (id_usuario, nombre, password, rol) VALUES (?, ?, ?, ?)',
-        [id_usuario, nombre, hashedPassword, rol],
-        (err, result) => {
+        'INSERT INTO usuarios (id_usuario, nombre, password, rol_id) VALUES (?, ?, ?, ?)',
+        [id_usuario, nombre, hashedPassword, rol_id],
+        (err) => {
           if (err) return res.status(500).json({ message: 'Error al insertar usuario' })
           res.status(201).json({ message: 'Usuario creado exitosamente' })
         }
@@ -59,7 +65,7 @@ router.post('/usuarios', verificarAdmin, async (req, res) => {
   })
 })
 
-// GET /api/roles → Obtener lista de roles disponibles
+// ✅ GET /api/roles → Obtener lista de roles
 router.get('/roles', (req, res) => {
   db.query('SELECT id, nombre FROM roles', (err, results) => {
     if (err) {
