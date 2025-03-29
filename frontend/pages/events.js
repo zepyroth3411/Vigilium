@@ -1,64 +1,71 @@
-import { FiAlertCircle, FiClock, FiCheckCircle, FiMessageCircle } from 'react-icons/fi'
+import { useEffect, useRef, useState } from 'react'
 
 export default function Eventos() {
-  const eventos = [
-    {
-      id: 1,
-      tipo: 'Alerta crítica',
-      descripcion: 'Batería baja en dispositivo TL280-001',
-      hora: '2025-03-29 08:32',
-      dispositivo: 'TL280-001',
-      estado: 'pendiente'
-    },
-    {
-      id: 2,
-      tipo: 'Notificación',
-      descripcion: 'Dispositivo TL280-002 volvió a conectarse',
-      hora: '2025-03-29 08:28',
-      dispositivo: 'TL280-002',
-      estado: 'resuelto'
-    },
-    {
-      id: 3,
-      tipo: 'Alerta crítica',
-      descripcion: 'Zona abierta en dispositivo TL280-003',
-      hora: '2025-03-29 08:20',
-      dispositivo: 'TL280-003',
-      estado: 'pendiente'
-    },
+  const [eventos, setEventos] = useState([])
+  const logRef = useRef(null)
+
+  const eventosSimulados = [
+    'Batería baja',
+    'Zona abierta',
+    'Señal restablecida',
+    'Fallo de comunicación',
+    'Reconexión de dispositivo',
+    'Alarma de pánico',
+    'Evento de prueba',
   ]
 
-  return (
-    <div className="p-6 bg-[#f5f6fa] min-h-screen">
-      <h1 className="text-3xl font-bold text-primary">Eventos</h1>
-      <p className="text-gray-600 mt-1">Monitoreo en tiempo real de eventos críticos del sistema</p>
+  const dispositivosSimulados = ['TL280-001', 'TL280-002', 'TL280-003', 'TL280-004']
 
-      <div className="mt-6 space-y-4">
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      const nuevoEvento = {
+        id: Date.now(),
+        tipo: Math.random() < 0.5 ? 'ALERTA CRÍTICA' : 'NOTIFICACIÓN',
+        descripcion: eventosSimulados[Math.floor(Math.random() * eventosSimulados.length)],
+        hora: new Date().toLocaleTimeString(),
+        dispositivo: dispositivosSimulados[Math.floor(Math.random() * dispositivosSimulados.length)],
+      }
+
+      setEventos(prev => [...prev.slice(-49), nuevoEvento])
+    }, 3000)
+
+    return () => clearInterval(intervalo)
+  }, [])
+
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight
+    }
+  }, [eventos])
+
+  return (
+    <div className="p-6 bg-[#f9fafb] min-h-screen">
+      <h1 className="text-3xl font-bold text-primary">Eventos</h1>
+      <p className="text-gray-600 mt-1 mb-4">Registro de eventos en tiempo real</p>
+
+      <div
+        ref={logRef}
+        className="bg-white h-[400px] overflow-y-auto rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm"
+      >
         {eventos.map(evento => (
           <div
             key={evento.id}
-            className={`flex items-start p-4 rounded-xl border shadow-sm bg-white space-x-4 ${
-              evento.estado === 'pendiente' ? 'border-red-300' : 'border-gray-200'
-            }`}
+            className="bg-gray-50 p-3 rounded-md shadow-sm border border-gray-100"
           >
-            <div className="text-red-600 mt-1 text-xl">
-              {evento.estado === 'pendiente' ? <FiAlertCircle /> : <FiCheckCircle className="text-green-600" />}
-            </div>
-            <div className="flex-1">
-              <h2 className="font-semibold text-gray-800">{evento.tipo}</h2>
-              <p className="text-sm text-gray-600">{evento.descripcion}</p>
-              <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                <FiClock className="inline-block" /> {evento.hora} | Dispositivo: <strong>{evento.dispositivo}</strong>
-              </div>
-            </div>
-            {evento.estado === 'pendiente' && (
-              <button
-                className="text-sm flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-md hover:bg-red-200 transition"
-                onClick={() => alert('Mensaje enviado ⚠️')}
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">{evento.hora}</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full
+                ${evento.tipo === 'ALERTA CRÍTICA'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-blue-100 text-blue-800'
+                }`}
               >
-                <FiMessageCircle /> Enviar mensaje
-              </button>
-            )}
+                {evento.tipo}
+              </span>
+            </div>
+            <div className="mt-1 text-gray-800 text-sm">
+              <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
+            </div>
           </div>
         ))}
       </div>
