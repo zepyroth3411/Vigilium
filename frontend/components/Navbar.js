@@ -50,7 +50,7 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Dropdown Administración */}
+          {/* Submenú Administración */}
           {userRole === 'admin' && (
             <div className="relative group">
               <span
@@ -70,10 +70,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Botón Cerrar sesión */}
+          {/* Cerrar sesión con mismo estilo que los demás */}
           <button
             onClick={logout}
-            className="text-sm text-red-600 hover:underline ml-4"
+            className="px-3 py-1 rounded-md text-sm text-red-600 hover:bg-red-50 transition-all duration-300"
           >
             Cerrar sesión
           </button>
@@ -116,7 +116,12 @@ export default function Navbar() {
           )}
 
           <li>
-            <button onClick={logout} className="block px-3 py-2 text-red-600 text-left">Cerrar sesión</button>
+            <button
+              onClick={logout}
+              className="block px-3 py-2 text-left text-red-600 hover:bg-red-50 rounded-md"
+            >
+              Cerrar sesión
+            </button>
           </li>
         </ul>
       )}
