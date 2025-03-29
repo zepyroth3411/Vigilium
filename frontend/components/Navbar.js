@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { logout } from '@/utils/auth'
 
 export default function Navbar() {
   const router = useRouter()
@@ -68,6 +69,9 @@ export default function Navbar() {
           ))}
         </ul>
       )}
+      <button onClick={logout} className='text-sm text-red-600 hover:underline'>
+        Cerrar sesión
+      </button>
     </nav>
   )
 }

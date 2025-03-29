@@ -2,9 +2,24 @@ import '../styles/globals.css'
 import Navbar from '../components/Navbar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { isAuthenticated } from '../utils/auth'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter()
+  const noAuthRoutes = ['/login']
+
+  useEffect(() => {
+    const isAuthPage = noAuthRoutes.includes(router.pathname)
+
+    if (!isAuthenticated() && !isAuthPage) {
+      router.push('/login')
+    }
+
+    if (isAuthenticated() && router.pathname === '/login') {
+      router.push('/dashboard')
+    }
+  }, [router.pathname])
 
   return (
     <>
