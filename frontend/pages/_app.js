@@ -21,9 +21,11 @@ function MyApp({ Component, pageProps }) {
     }
   }, [router.pathname])
 
+  const showNavbar = !noAuthRoutes.includes(router.pathname)
+
   return (
     <>
-      <Navbar />
+      {showNavbar && <Navbar />}
       <AnimatePresence mode="wait">
         <motion.div
           key={router.route}

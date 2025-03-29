@@ -13,7 +13,6 @@ export default function Navbar() {
     { href: '/events', label: 'Eventos' },
     { href: '/client', label: 'Clientes' },
     { href: '/settings', label: 'Configuración' },
-    { href: '/login', label: 'Login' },
   ]
 
   return (
@@ -22,7 +21,7 @@ export default function Navbar() {
         {/* Logo */}
         <h1 className="text-2xl font-bold text-primary tracking-tight">Vigilium</h1>
 
-        {/* Botón Hamburguesa para móviles */}
+        {/* Botón hamburguesa */}
         <button
           className="md:hidden text-gray-700 text-2xl"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -30,8 +29,8 @@ export default function Navbar() {
           ☰
         </button>
 
-        {/* Menú en escritorio */}
-        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700">
+        {/* Menú escritorio */}
+        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700 items-center">
           {links.map(link => (
             <li key={link.href}>
               <Link
@@ -46,10 +45,19 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          {/* Botón cerrar sesión (escritorio) */}
+          <li>
+            <button
+              onClick={logout}
+              className="px-3 py-1 rounded-md text-sm text-red-600 hover:underline transition"
+            >
+              Cerrar sesión
+            </button>
+          </li>
         </ul>
       </div>
 
-      {/* Menú desplegable para móvil */}
+      {/* Menú móvil */}
       {menuOpen && (
         <ul className="md:hidden px-6 pb-4 space-y-2 text-sm font-medium text-gray-700">
           {links.map(link => (
@@ -67,11 +75,20 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          {/* Botón cerrar sesión (móvil) */}
+          <li>
+            <button
+              onClick={() => {
+                setMenuOpen(false)
+                logout()
+              }}
+              className="block w-full text-left px-3 py-2 rounded-md text-red-600 hover:underline transition"
+            >
+              Cerrar sesión
+            </button>
+          </li>
         </ul>
       )}
-      <button onClick={logout} className='text-sm text-red-600 hover:underline'>
-        Cerrar sesión
-      </button>
     </nav>
   )
 }
