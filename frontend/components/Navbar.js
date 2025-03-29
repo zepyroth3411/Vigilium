@@ -12,7 +12,7 @@ export default function Navbar() {
     { href: '/devices', label: 'Dispositivos' },
     { href: '/events', label: 'Eventos' },
     { href: '/client', label: 'Clientes' },
-    { href: '/settings', label: 'Configuración' },
+    { href: '/admin', label: 'Administración' },
   ]
 
   return (
