@@ -7,6 +7,7 @@ import { jwtDecode } from 'jwt-decode'
 export default function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false)
   const [userRole, setUserRole] = useState(null)
 
   useEffect(() => {
@@ -28,14 +29,6 @@ export default function Navbar() {
     { href: '/client', label: 'Clientes' },
   ]
 
-  if (userRole === 'admin') {
-    links.push(
-      { href: '/admin/users', label: 'Admin - Users' },
-      { href: '/admin/roles', label: 'Admin - Roles' },
-      { href: '/admin/password', label: 'Change Password' }
-    )
-  }
-
   return (
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -51,7 +44,7 @@ export default function Navbar() {
         </button>
 
         {/* Menú en escritorio */}
-        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700">
+        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700 items-center">
           {links.map(link => (
             <li key={link.href}>
               <Link
@@ -66,6 +59,41 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+
+          {userRole === 'admin' && (
+            <li className="relative">
+              <button
+                onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                className={`px-3 py-1 rounded-md transition-all duration-300 ${
+                  router.pathname.startsWith('/admin')
+                    ? 'bg-orange-100 text-primary font-semibold'
+                    : 'hover:bg-orange-50 hover:text-primary'
+                }`}
+              >
+                Administración ⌄
+              </button>
+
+              {adminMenuOpen && (
+                <ul className="absolute bg-white border mt-1 rounded-md shadow-md w-48 z-10">
+                  <li>
+                    <Link href="/admin/users" className="block px-4 py-2 hover:bg-orange-50 text-sm">
+                      👥 Usuarios
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/roles" className="block px-4 py-2 hover:bg-orange-50 text-sm">
+                      🔐 Roles
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/password" className="block px-4 py-2 hover:bg-orange-50 text-sm">
+                      🔑 Cambiar contraseña
+                    </Link>
+                  </li>
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       </div>
 
@@ -87,6 +115,14 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+
+          {userRole === 'admin' && (
+            <>
+              <li><Link href="/admin/users" className="block px-3 py-2">👥 Usuarios</Link></li>
+              <li><Link href="/admin/roles" className="block px-3 py-2">🔐 Roles</Link></li>
+              <li><Link href="/admin/password" className="block px-3 py-2">🔑 Cambiar contraseña</Link></li>
+            </>
+          )}
         </ul>
       )}
 
