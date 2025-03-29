@@ -51,4 +51,3 @@ router.post('/login', (req, res) => {
 })
 
 module.exports = router
-localStorage.removeItem('vigilium_token')
