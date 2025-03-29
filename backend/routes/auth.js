@@ -1,39 +1,48 @@
-// routes/auth.js
 const express = require('express')
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const router = express.Router()
+const db = require('../db')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
-// Usuario simulado
-const usuarios = [
-  {
-    id: 1,
-    email: 'admin@vigilium.com',
-    password: bcrypt.hashSync('123456', 10), // Contraseña hasheada
-    rol: 'admin'
-  }
-]
-
+// Ruta POST /login
 router.post('/login', (req, res) => {
-  const { email, password } = req.body
-  const usuario = usuarios.find(u => u.email === email)
+  const { id_usuario, password } = req.body
 
-  if (!usuario) {
-    return res.status(401).json({ message: 'Usuario no encontrado' })
+  if (!id_usuario || !password) {
+    return res.status(400).json({ message: 'Faltan datos' })
   }
 
-  const validPass = bcrypt.compareSync(password, usuario.password)
-  if (!validPass) {
-    return res.status(401).json({ message: 'Contraseña incorrecta' })
-  }
+  // Buscar usuario en la base de datos
+  const query = 'SELECT * FROM usuarios WHERE id_usuario = ?'
+  db.query(query, [id_usuario], async (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error de base de datos' })
 
-  const token = jwt.sign(
-    { id: usuario.id, email: usuario.email, rol: usuario.rol },
-    process.env.JWT_SECRET || 'secreto123',
-    { expiresIn: '2h' }
-  )
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Usuario no encontrado' })
+    }
 
-  res.json({ token })
+    const usuario = results[0]
+
+    // Validar contraseña
+    const isMatch = await bcrypt.compare(password, usuario.password)
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' })
+    }
+
+    // Generar token con rol
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        id_usuario: usuario.id_usuario,
+        nombre: usuario.nombre,
+        rol: usuario.rol
+      },
+      process.env.JWT_SECRET || 'vigilium_secret_2025',
+      { expiresIn: '2h' }
+    )
+
+    res.json({ token })
+  })
 })
 
 module.exports = router
