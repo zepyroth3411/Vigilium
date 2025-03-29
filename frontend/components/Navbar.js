@@ -60,7 +60,7 @@ export default function Navbar() {
                     : 'hover:bg-orange-50 hover:text-primary'
                 }`}
               >
-                Administración ⌄
+                Administración
               </span>
               <div className="absolute hidden group-hover:block bg-white border mt-2 rounded-md shadow-md w-48 z-10">
                 <Link href="/admin/users" className="block px-4 py-2 hover:bg-orange-50 text-sm">👥 Usuarios</Link>
