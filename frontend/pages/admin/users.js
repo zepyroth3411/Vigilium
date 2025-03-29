@@ -3,10 +3,11 @@ import { useRouter } from 'next/router'
 
 export default function UserManagement() {
   const [usuarios, setUsuarios] = useState([])
+  const [rolesDisponibles, setRolesDisponibles] = useState([])
   const [idUsuario, setIdUsuario] = useState('')
   const [nombre, setNombre] = useState('')
   const [password, setPassword] = useState('')
-  const [rol, setRol] = useState('monitorista')
+  const [rolId, setRolId] = useState('')
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
 
@@ -19,6 +20,7 @@ export default function UserManagement() {
       return
     }
 
+    // Obtener usuarios
     fetch('http://localhost:4000/api/usuarios', {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -28,6 +30,12 @@ export default function UserManagement() {
       })
       .then(data => setUsuarios(data))
       .catch(err => setError(err.message))
+
+    // Obtener roles
+    fetch('http://localhost:4000/api/roles')
+      .then(res => res.json())
+      .then(data => setRolesDisponibles(data))
+      .catch(err => console.error('Error al obtener roles:', err))
   }, [])
 
   const handleAgregarUsuario = async (e) => {
@@ -41,7 +49,7 @@ export default function UserManagement() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id_usuario: idUsuario, nombre, password, rol })
+        body: JSON.stringify({ id_usuario: idUsuario, nombre, password, rol_id: rolId })
       })
 
       const data = await res.json()
@@ -55,10 +63,10 @@ export default function UserManagement() {
       setIdUsuario('')
       setNombre('')
       setPassword('')
-      setRol('monitorista')
+      setRolId('')
 
       // Actualiza la lista de usuarios
-      setUsuarios(prev => [...prev, { id_usuario: idUsuario, nombre, rol }])
+      setUsuarios(prev => [...prev, { id_usuario: idUsuario, nombre, rol: rolesDisponibles.find(r => r.id === parseInt(rolId))?.nombre || '' }])
     } catch (err) {
       setError(err.message)
       setSuccess(null)
@@ -131,12 +139,15 @@ export default function UserManagement() {
             className="border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm"
           />
           <select
-            value={rol}
-            onChange={(e) => setRol(e.target.value)}
+            value={rolId}
+            onChange={(e) => setRolId(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm"
+            required
           >
-            <option value="monitorista">Monitorista</option>
-            <option value="admin">Admin</option>
+            <option value="">Selecciona un rol</option>
+            {rolesDisponibles.map((rol) => (
+              <option key={rol.id} value={rol.id}>{rol.nombre}</option>
+            ))}
           </select>
           <div className="md:col-span-2 text-right">
             <button
