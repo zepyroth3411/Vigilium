@@ -8,7 +8,7 @@ export default function Navbar() {
 
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/device', label: 'Dispositivos' },
+    { href: '/devices', label: 'Dispositivos' },
     { href: '/eventos', label: 'Eventos' },
     { href: '/clientes', label: 'Clientes' },
     { href: '/configuracion', label: 'Configuración' },
