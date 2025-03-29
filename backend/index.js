@@ -1,19 +1,15 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const express = require('express')
+const cors = require('cors')
+const authRoutes = require('./routes/auth') // ✅ Aquí se importa el router
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const app = express()
+const PORT = process.env.PORT || 4000
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
 
-app.use('/api',authRoutes)
-
-app.get('/', (req, res) => {
-  res.send('Vigilium Backend funcionando 🚀');
-});
+app.use('/api', authRoutes)
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+  console.log(`🔐 Backend corriendo en http://localhost:${PORT}`)
+})
