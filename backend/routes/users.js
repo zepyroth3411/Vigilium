@@ -59,4 +59,15 @@ router.post('/usuarios', verificarAdmin, async (req, res) => {
   })
 })
 
+// GET /api/roles → Obtener lista de roles disponibles
+router.get('/roles', (req, res) => {
+  db.query('SELECT id, nombre FROM roles', (err, results) => {
+    if (err) {
+      console.error('❌ Error al obtener roles:', err)
+      return res.status(500).json({ message: 'Error al obtener roles' })
+    }
+    res.json(results)
+  })
+})
+
 module.exports = router
