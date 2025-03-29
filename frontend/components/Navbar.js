@@ -1,19 +1,40 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { logout } from '@/utils/auth'
+import jwt_decode from 'jwt-decode'
 
 export default function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [userRole, setUserRole] = useState(null)
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('vigilium_token') : null
+    if (token) {
+      try {
+        const decoded = jwt_decode(token)
+        setUserRole(decoded.rol)
+      } catch (err) {
+        console.error('Error decoding token', err)
+      }
+    }
+  }, [])
 
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/devices', label: 'Dispositivos' },
     { href: '/events', label: 'Eventos' },
     { href: '/client', label: 'Clientes' },
-    { href: '/admin', label: 'Administración' },
   ]
+
+  if (userRole === 'admin') {
+    links.push(
+      { href: '/admin/users', label: 'Admin - Users' },
+      { href: '/admin/roles', label: 'Admin - Roles' },
+      { href: '/admin/password', label: 'Change Password' }
+    )
+  }
 
   return (
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
@@ -21,7 +42,7 @@ export default function Navbar() {
         {/* Logo */}
         <h1 className="text-2xl font-bold text-primary tracking-tight">Vigilium</h1>
 
-        {/* Botón hamburguesa */}
+        {/* Botón Hamburguesa para móviles */}
         <button
           className="md:hidden text-gray-700 text-2xl"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -29,8 +50,8 @@ export default function Navbar() {
           ☰
         </button>
 
-        {/* Menú escritorio */}
-        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700 items-center">
+        {/* Menú en escritorio */}
+        <ul className="hidden md:flex space-x-4 text-sm font-medium text-gray-700">
           {links.map(link => (
             <li key={link.href}>
               <Link
@@ -45,19 +66,10 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
-          {/* Botón cerrar sesión (escritorio) */}
-          <li>
-            <button
-              onClick={logout}
-              className="px-3 py-1 rounded-md text-sm text-red-600 hover:underline transition"
-            >
-              Cerrar sesión
-            </button>
-          </li>
         </ul>
       </div>
 
-      {/* Menú móvil */}
+      {/* Menú desplegable para móvil */}
       {menuOpen && (
         <ul className="md:hidden px-6 pb-4 space-y-2 text-sm font-medium text-gray-700">
           {links.map(link => (
@@ -75,20 +87,17 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
-          {/* Botón cerrar sesión (móvil) */}
-          <li>
-            <button
-              onClick={() => {
-                setMenuOpen(false)
-                logout()
-              }}
-              className="block w-full text-left px-3 py-2 rounded-md text-red-600 hover:underline transition"
-            >
-              Cerrar sesión
-            </button>
-          </li>
         </ul>
       )}
+
+      <div className="px-6 pb-4 md:pb-0 text-right">
+        <button
+          onClick={logout}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Cerrar sesión
+        </button>
+      </div>
     </nav>
   )
 }
