@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { logout } from '@/utils/auth'
-import jwt_decode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 export default function Navbar() {
   const router = useRouter()
@@ -13,7 +13,7 @@ export default function Navbar() {
     const token = typeof window !== 'undefined' ? localStorage.getItem('vigilium_token') : null
     if (token) {
       try {
-        const decoded = jwt_decode(token)
+        const decoded = jwtDecode(token)
         setUserRole(decoded.rol)
       } catch (err) {
         console.error('Error decoding token', err)
