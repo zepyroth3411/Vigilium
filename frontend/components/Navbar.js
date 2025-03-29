@@ -9,9 +9,9 @@ export default function Navbar() {
   const links = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/devices', label: 'Dispositivos' },
-    { href: '/eventos', label: 'Eventos' },
-    { href: '/clientes', label: 'Clientes' },
-    { href: '/configuracion', label: 'Configuración' },
+    { href: '/events', label: 'Eventos' },
+    { href: '/client', label: 'Clientes' },
+    { href: '/settings', label: 'Configuración' },
     { href: '/login', label: 'Login' },
   ]
 
