@@ -9,12 +9,23 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Simulación temporal (en el siguiente paso hacemos real)
-    if (email === 'admin@vigilium.com' && password === '123456') {
-      localStorage.setItem('vigilium_token', 'demo_token_123')
+    try {
+      const res = await fetch('http://localhost:4000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message)
+      }
+
+      localStorage.setItem('vigilium_token', data.token)
       router.push('/dashboard')
-    } else {
-      alert('Credenciales incorrectas')
+    } catch (err) {
+      alert('Error: ' + err.message)
     }
   }
 
