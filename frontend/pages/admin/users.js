@@ -19,23 +19,36 @@ export default function UserManagement() {
       router.push('/login')
       return
     }
-
-    // Obtener usuarios
-    fetch('http://localhost:4000/api/usuarios', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Acceso restringido')
-        return res.json()
-      })
-      .then(data => setUsuarios(data))
-      .catch(err => setError(err.message))
-
-    // Obtener roles
-    fetch('http://localhost:4000/api/roles')
-      .then(res => res.json())
-      .then(data => setRolesDisponibles(data))
-      .catch(err => console.error('Error al obtener roles:', err))
+  
+    const fetchUsuarios = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/usuarios', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+  
+        if (!res.ok) {
+          throw new Error('No autorizado')
+        }
+  
+        const data = await res.json()
+        setUsuarios(data)
+      } catch (err) {
+        setError(err.message)
+      }
+    }
+  
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/roles')
+        const data = await res.json()
+        setRolesDisponibles(data)
+      } catch (err) {
+        console.error('Error al obtener roles:', err)
+      }
+    }
+  
+    fetchUsuarios()
+    fetchRoles()
   }, [])
 
   const handleAgregarUsuario = async (e) => {
