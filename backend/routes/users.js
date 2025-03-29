@@ -76,4 +76,24 @@ router.get('/roles', (req, res) => {
   })
 })
 
-module.exports = router
+function verificarAdmin(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1]
+  console.log('🛡️ Token recibido:', token)
+
+  if (!token) return res.status(401).json({ message: 'Token requerido' })
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'vigilium_super_secret_2025')
+    console.log('✅ Decodificado:', decoded)
+
+    if (decoded.rol !== 'admin') {
+      console.log('❌ Rol NO autorizado:', decoded.rol)
+      return res.status(403).json({ message: 'Acceso restringido' })
+    }
+
+    next()
+  } catch (err) {
+    console.log('❌ Token inválido:', err)
+    return res.status(403).json({ message: 'Token inválido' })
+  }
+}
