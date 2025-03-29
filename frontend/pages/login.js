@@ -4,7 +4,7 @@ import Toast from '@/components/Toast'
 
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [idUsuario, setIdUsuario] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
   const [toast, setToast] = useState(null)
@@ -16,7 +16,7 @@ export default function Login() {
       const res = await fetch('http://localhost:4000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ id_usuario: idUsuario, password })
       })
   
       const data = await res.json()
@@ -56,9 +56,9 @@ export default function Login() {
             <div>
               <label className="block text-sm text-gray-700">Correo electrónico</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={idUsuario}
+                onChange={(e) => setIdUsuario(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm"
                 required
               />
