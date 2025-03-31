@@ -3,7 +3,9 @@ import EventsFilter from '@/components/events/EventsFilter'
 import socket from '@/utils/socket'
 
 export default function Eventos() {
-  const [nombreUsuario, setNombreUsuario] = useState('Monitorista') // <-- ahora sí
+  
+  const [nombreUsuario, setNombreUsuario] = useState('Monitorista')
+  const [idUsuario, setIdUsuario] = useState('monitor01')
   const [eventos, setEventos] = useState([])
   const [historialCritico, setHistorialCritico] = useState([])
   const [filtro, setFiltro] = useState({
@@ -33,7 +35,9 @@ export default function Eventos() {
   // Recuperar nombre de usuario del localStorage
   useEffect(() => {
     const nombre = localStorage.getItem('vigilium_user')
+    const id = localStorage.getItem('vigilium_user_id')
     if (nombre) setNombreUsuario(nombre)
+    if (id) setIdUsuario(id)
   }, [])
 
   useEffect(() => {
@@ -91,7 +95,8 @@ export default function Eventos() {
     if (evento) {
       const eventoConUsuario = {
         ...evento,
-        atendidoPor: nombreUsuario
+        atendidoPor: nombreUsuario,
+        atendidoPorId: idUsuario
       }
 
       setHistorialCritico(prev => [eventoConUsuario, ...prev])
@@ -170,7 +175,7 @@ export default function Eventos() {
                 <div className="flex justify-between">
                   <span className="text-gray-500">{evento.hora}</span>
                   <span className="text-xs font-semibold text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
-                    Atendido por: {evento.atendidoPor || '—'}
+                       Atendido por: {evento.atendidoPor || '—'} ({evento.atendidoPorId || '—'})
                   </span>
                 </div>
                 <div className="mt-1 text-gray-800">

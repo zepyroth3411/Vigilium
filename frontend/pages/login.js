@@ -24,6 +24,9 @@ export default function Login() {
       if (!res.ok) {
         throw new Error(data.message)
       }
+      const decoded = JSON.parse(atob(data.token.split('.')[1]))
+      localStorage.setItem('vigilium_user_id', decoded.id_usuario)
+      localStorage.setItem('vigilium_user', decoded.nombre)
       localStorage.setItem('vigilium_token', data.token)
   
       // 🎉 Mensaje de bienvenida
