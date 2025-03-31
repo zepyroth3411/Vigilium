@@ -3,7 +3,7 @@ import EventsFilter from '@/components/events/EventsFilter'
 import socket from '@/utils/socket'
 
 export default function Eventos() {
-  
+
   const [nombreUsuario, setNombreUsuario] = useState('Monitorista')
   const [idUsuario, setIdUsuario] = useState('monitor01')
   const [eventos, setEventos] = useState([])
@@ -84,6 +84,12 @@ export default function Eventos() {
       setEventos((prev) => prev.filter(e => e.id !== evento.id))
       setHistorialCritico((prev) => [evento, ...prev])
     })
+    
+    socket.on('actualizarDescripcion', (eventoActualizado) => {
+      setHistorialCritico(prev =>
+        prev.map(e => e.id === eventoActualizado.id ? eventoActualizado : e)
+      )
+    })
 
     return () => {
       socket.off('eventoAtendido')
@@ -93,10 +99,15 @@ export default function Eventos() {
   const marcarComoAtendido = (id) => {
     const evento = eventos.find(e => e.id === id)
     if (evento) {
+      const descripcionAtencion = prompt("¿Cómo se atendió este evento?")
+
+      if (!descripcionAtencion) return // Cancelado
+
       const eventoConUsuario = {
         ...evento,
         atendidoPor: nombreUsuario,
-        atendidoPorId: idUsuario
+        idUsuario: localStorage.getItem('vigilium_user_id'),
+        descripcionAtencion
       }
 
       setHistorialCritico(prev => [eventoConUsuario, ...prev])
@@ -175,12 +186,37 @@ export default function Eventos() {
                 <div className="flex justify-between">
                   <span className="text-gray-500">{evento.hora}</span>
                   <span className="text-xs font-semibold text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
-                       Atendido por: {evento.atendidoPor || '—'} ({evento.atendidoPorId || '—'})
+                    Atendido por: {evento.atendidoPor || '—'} ({evento.atendidoPorId || '—'})
                   </span>
                 </div>
                 <div className="mt-1 text-gray-800">
                   <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
                 </div>
+                {evento.descripcionAtencion && (
+                  <div className="mt-1 text-sm text-gray-600 italic">
+                    📝 {evento.descripcionAtencion}
+                  </div>
+                )}
+                {evento.idUsuario === localStorage.getItem('vigilium_user_id') && (
+                  <button
+                    onClick={() => {
+                      const nuevaDescripcion = prompt("Editar cómo se atendió:", evento.descripcionAtencion || '')
+                      if (nuevaDescripcion) {
+                        const actualizado = {
+                          ...evento,
+                          descripcionAtencion: nuevaDescripcion
+                        }
+                        setHistorialCritico(prev =>
+                          prev.map(e => e.id === evento.id ? actualizado : e)
+                        )
+                        socket.emit('actualizarDescripcion', actualizado)
+                      }
+                    }}
+                    className="mt-2 text-xs text-blue-600 hover:underline"
+                  >
+                    ✏️ Editar descripción
+                  </button>
+                )}
               </div>
             ))}
           </div>
