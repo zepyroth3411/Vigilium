@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 export default function UserManagement() {
+  const router = useRouter()
   const [usuarios, setUsuarios] = useState([])
   const [rolesDisponibles, setRolesDisponibles] = useState([])
   const [idUsuario, setIdUsuario] = useState('')
@@ -15,32 +16,40 @@ export default function UserManagement() {
   const [editPassword, setEditPassword] = useState('')
   const [rolId, setRolId] = useState('')
 
-  const router = useRouter()
-
   useEffect(() => {
     const token = localStorage.getItem('vigilium_token')
     if (!token) {
+      router.push('/dashboard')
+      return
+    }
+  
+    try {
+      const decoded = JSON.parse(atob(token.split('.')[1])) // decodifica el payload del JWT
+      if (decoded.rol !== 'admin') {
+        router.push('/login') // o redirige a otra ruta si prefieres
+        return
+      }
+    } catch (error) {
+      console.error('Token inválido', error)
       router.push('/login')
       return
     }
-
+  
     const fetchUsuarios = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/usuarios', {
           headers: { Authorization: `Bearer ${token}` }
         })
-
-        if (!res.ok) {
-          throw new Error('No autorizado')
-        }
-
+  
+        if (!res.ok) throw new Error('No autorizado')
+  
         const data = await res.json()
         setUsuarios(data)
       } catch (err) {
         setError(err.message)
       }
     }
-
+  
     const fetchRoles = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/roles')
@@ -50,7 +59,7 @@ export default function UserManagement() {
         console.error('Error al obtener roles:', err)
       }
     }
-
+  
     fetchUsuarios()
     fetchRoles()
   }, [])
