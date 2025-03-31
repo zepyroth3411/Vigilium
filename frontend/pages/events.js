@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import EventsFilter from '@/components/events/EventsFilter'
+import socket from '@/utils/socket'
+
+const nombreUsuario = localStorage.getItem('vigilium_user') || 'Monitorista'
 
 export default function Eventos() {
   const [eventos, setEventos] = useState([])
   const [historialCritico, setHistorialCritico] = useState([])
-  const [filtro, setFiltro] = useState({ 
+  const [filtro, setFiltro] = useState({
     tipo: '',
     dispositivo: '',
     fechaInicio: '',
-    fechaFin: '' })
+    fechaFin: ''
+  })
 
   const logRef = useRef(null)
 
@@ -29,11 +33,11 @@ export default function Eventos() {
 
   useEffect(() => {
     const audio = new Audio('/criticalalert.mp3')
-  
+
     const intervalo = setInterval(() => {
       const descripcion = eventosSimulados[Math.floor(Math.random() * eventosSimulados.length)]
       const esCritico = ['FUEGO', 'MÉDICA', 'ROBO'].includes(descripcion)
-  
+
       const nuevoEvento = {
         id: Date.now(),
         tipo: esCritico ? 'ALERTA CRÍTICA' : 'NOTIFICACIÓN',
@@ -42,50 +46,70 @@ export default function Eventos() {
         dispositivo: dispositivosSimulados[Math.floor(Math.random() * dispositivosSimulados.length)],
         atendido: false
       }
-  
+
       setEventos(prev => [...prev.slice(-49), nuevoEvento])
-  
+
       if (esCritico) {
         audio.play().catch(err => {
           console.warn('⚠️ No se pudo reproducir sonido:', err)
         })
       }
     }, 3000)
-  
+
     return () => clearInterval(intervalo)
   }, [])
 
   useEffect(() => {
     const log = logRef.current
     if (!log) return
-  
+
     const isAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 50
-  
+
     if (isAtBottom) {
       log.scrollTop = log.scrollHeight
     }
   }, [eventos])
 
+  useEffect(() => {
+    socket.on('eventoAtendido', (evento) => {
+      setEventos((prev) => prev.filter(e => e.id !== evento.id))
+      setHistorialCritico((prev) => [evento, ...prev])
+    })
+
+    return () => {
+      socket.off('eventoAtendido')
+    }
+  }, [])
+
   const marcarComoAtendido = (id) => {
     const evento = eventos.find(e => e.id === id)
     if (evento) {
-      setHistorialCritico(prev => [evento, ...prev])
+      const eventoConUsuario = {
+        ...evento,
+        atendidoPor: nombreUsuario
+      }
+
+      setHistorialCritico(prev => [eventoConUsuario, ...prev])
       setEventos(prev => prev.filter(e => e.id !== id))
+
+      // 🔁 Notificar a otros monitoristas
+      socket.emit('marcarAtendido', eventoConUsuario)
     }
   }
+
 
   const eventosFiltrados = eventos.filter(e => {
     const coincideTipo = !filtro.tipo || e.tipo === filtro.tipo
     const coincideDispositivo = !filtro.dispositivo || e.dispositivo === filtro.dispositivo
-  
+
     const eventoFecha = new Date(e.fecha)
     const desde = filtro.fechaInicio ? new Date(filtro.fechaInicio) : null
     const hasta = filtro.fechaFin ? new Date(filtro.fechaFin) : null
-  
+
     const dentroDeRango =
       (!desde || eventoFecha >= desde) &&
       (!hasta || eventoFecha <= hasta)
-  
+
     return coincideTipo && coincideDispositivo && dentroDeRango
   })
 
@@ -147,6 +171,9 @@ export default function Eventos() {
                 <div className="mt-1 text-gray-800">
                   <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
                 </div>
+                {evento.atendidoPor && (
+                  <p className="text-xs text-gray-500 mt-1">Atendido por: <strong>{evento.atendidoPor}</strong></p>
+                )}
               </div>
             ))}
           </div>

@@ -4,6 +4,8 @@ const db = require('../db')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
+
+
 // POST /login
 router.post('/login', (req, res) => {
   const { id_usuario, password } = req.body
