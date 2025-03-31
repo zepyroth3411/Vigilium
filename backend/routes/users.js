@@ -97,4 +97,27 @@ function verificarAdmin(req, res, next) {
     return res.status(403).json({ message: 'Token inválido' })
   }
 }
+
+// ✅ PUT /api/usuarios/:id → Editar nombre y rol del usuario
+router.put('/usuarios/:id', verificarAdmin, (req, res) => {
+  const { nombre, rol_id } = req.body
+  const { id } = req.params
+
+  if (!nombre || !rol_id) {
+    return res.status(400).json({ message: 'Nombre y rol son obligatorios' })
+  }
+
+  const query = 'UPDATE usuarios SET nombre = ?, rol_id = ? WHERE id_usuario = ?'
+  db.query(query, [nombre, rol_id, id], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Error al actualizar usuario' })
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    res.json({ message: 'Usuario actualizado correctamente' })
+  })
+})
+
+
 module.exports = router
