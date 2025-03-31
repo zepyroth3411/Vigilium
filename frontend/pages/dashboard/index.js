@@ -28,7 +28,7 @@ export default function DashboardRedirect() {
           router.push('/dashboard/monitorist')
           break
         case 'tecnico':
-          router.push('/dashboard/tecnico')
+          router.push('/dashboard/technical')
           break
         default:
           router.push('/login')
