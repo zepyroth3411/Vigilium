@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import EventsFilter from '@/components/events/EventsFilter'
 import socket from '@/utils/socket'
 
-const nombreUsuario = localStorage.getItem('vigilium_user') || 'Monitorista'
-
 export default function Eventos() {
+  const [nombreUsuario, setNombreUsuario] = useState('Monitorista') // <-- ahora sí
   const [eventos, setEventos] = useState([])
   const [historialCritico, setHistorialCritico] = useState([])
   const [filtro, setFiltro] = useState({
@@ -30,6 +29,12 @@ export default function Eventos() {
   ]
 
   const dispositivosSimulados = ['TL280-001', 'TL280-002', 'TL280-003', 'TL280-004']
+
+  // Recuperar nombre de usuario del localStorage
+  useEffect(() => {
+    const nombre = localStorage.getItem('vigilium_user')
+    if (nombre) setNombreUsuario(nombre)
+  }, [])
 
   useEffect(() => {
     const audio = new Audio('/criticalalert.mp3')
@@ -64,12 +69,12 @@ export default function Eventos() {
     if (!log) return
 
     const isAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 50
-
     if (isAtBottom) {
       log.scrollTop = log.scrollHeight
     }
   }, [eventos])
 
+  // Escuchar eventos atendidos por otros monitoristas
   useEffect(() => {
     socket.on('eventoAtendido', (evento) => {
       setEventos((prev) => prev.filter(e => e.id !== evento.id))
@@ -92,11 +97,9 @@ export default function Eventos() {
       setHistorialCritico(prev => [eventoConUsuario, ...prev])
       setEventos(prev => prev.filter(e => e.id !== id))
 
-      // 🔁 Notificar a otros monitoristas
       socket.emit('marcarAtendido', eventoConUsuario)
     }
   }
-
 
   const eventosFiltrados = eventos.filter(e => {
     const coincideTipo = !filtro.tipo || e.tipo === filtro.tipo
@@ -166,14 +169,13 @@ export default function Eventos() {
               <div key={evento.id} className="border border-gray-100 p-3 rounded bg-gray-50 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">{evento.hora}</span>
-                  <span className="text-xs font-semibold text-red-800 bg-red-100 px-2 py-0.5 rounded-full">ATENDIDO</span>
+                  <span className="text-xs font-semibold text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
+                    Atendido por: {evento.atendidoPor || '—'}
+                  </span>
                 </div>
                 <div className="mt-1 text-gray-800">
                   <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
                 </div>
-                {evento.atendidoPor && (
-                  <p className="text-xs text-gray-500 mt-1">Atendido por: <strong>{evento.atendidoPor}</strong></p>
-                )}
               </div>
             ))}
           </div>

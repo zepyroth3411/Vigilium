@@ -24,7 +24,6 @@ export default function Login() {
       if (!res.ok) {
         throw new Error(data.message)
       }
-      localStorage.setItem('vigilium_user', decoded.nombre)
       localStorage.setItem('vigilium_token', data.token)
   
       // 🎉 Mensaje de bienvenida
