@@ -23,7 +23,9 @@ export default function Navbar() {
 
   // Links visibles por rol
   const visibleLinks = [
-    { href: '/dashboard', label: 'Dashboard', roles: ['admin'] },
+    { href: '/dashboard/admin', label: 'Dashboard', roles: ['admin'] },
+    { href: '/dashboard/monitorist', label: 'Dashboard', roles: ['monitorista'] },
+    { href: '/dashboard/technical', label: 'Dashboard', roles: ['tecnico'] },
     { href: '/devices', label: 'Dispositivos', roles: ['admin', 'monitorista', 'tecnico'] },
     { href: '/events', label: 'Eventos', roles: ['admin', 'monitorista'] },
     { href: '/client', label: 'Clientes', roles: ['admin', 'monitorista', 'tecnico'] },
