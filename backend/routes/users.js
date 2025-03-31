@@ -4,7 +4,21 @@ const db = require('../db')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
+// Middleware para verificar token y rol admin
+function verificarAdmin(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) return res.status(401).json({ message: 'Token requerido' })
 
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'vigilium_super_secret_2025')
+    if (decoded.rol !== 'admin') {
+      return res.status(403).json({ message: 'Acceso restringido' })
+    }
+    next()
+  } catch (err) {
+    return res.status(403).json({ message: 'Token inválido' })
+  }
+}
 
 // ✅ GET /api/usuarios → Lista de usuarios con JOIN a roles
 router.get('/usuarios', verificarAdmin, (req, res) => {
@@ -13,14 +27,13 @@ router.get('/usuarios', verificarAdmin, (req, res) => {
     FROM usuarios u
     LEFT JOIN roles r ON u.rol_id = r.id
   `
-
   db.query(query, (err, results) => {
     if (err) return res.status(500).json({ message: 'Error al obtener usuarios' })
     res.json(results)
   })
 })
 
-// ✅ POST /api/usuarios → Crear nuevo usuario con rol_id
+// ✅ POST /api/usuarios → Crear nuevo usuario
 router.post('/usuarios', verificarAdmin, async (req, res) => {
   const { id_usuario, nombre, password, rol_id } = req.body
 
@@ -36,7 +49,6 @@ router.post('/usuarios', verificarAdmin, async (req, res) => {
 
     try {
       const hashedPassword = await bcrypt.hash(password, 10)
-
       db.query(
         'INSERT INTO usuarios (id_usuario, nombre, password, rol_id) VALUES (?, ?, ?, ?)',
         [id_usuario, nombre, hashedPassword, rol_id],
@@ -51,67 +63,45 @@ router.post('/usuarios', verificarAdmin, async (req, res) => {
   })
 })
 
-// ✅ GET /api/roles → Obtener lista de roles
-router.get('/roles', (req, res) => {
-  db.query('SELECT id, nombre FROM roles', (err, results) => {
-    if (err) {
-      console.error('❌ Error al obtener roles:', err)
-      return res.status(500).json({ message: 'Error al obtener roles' })
-    }
-    res.json(results)
-  })
-})
-// Middleware para verificar el token y el rol admin
-function verificarAdmin(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1]
-  console.log('🛡️ Token recibido:', token)
-
-  if (!token) return res.status(401).json({ message: 'Token requerido' })
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'vigilium_super_secret_2025')
-    console.log('✅ Decodificado:', decoded)
-
-    if (decoded.rol !== 'admin') {
-      console.log('❌ Rol NO autorizado:', decoded.rol)
-      return res.status(403).json({ message: 'Acceso restringido' })
-    }
-
-    next()
-  } catch (err) {
-    console.log('❌ Token inválido:', err)
-    return res.status(403).json({ message: 'Token inválido' })
-  }
-}
-
-// ✅ PUT /api/usuarios/:id → Editar nombre y rol del usuario
-router.put('/usuarios/:id', verificarAdmin, (req, res) => {
-  const { nombre, rol_id } = req.body
+// ✅ PUT /api/usuarios/:id → Editar nombre, rol y contraseña opcional
+router.put('/usuarios/:id', verificarAdmin, async (req, res) => {
+  const { nombre, rol_id, password } = req.body
   const { id } = req.params
-
-  // 🔍 Log para ver qué está llegando
-  console.log('🛠️ Editar usuario -> ID:', id)
-  console.log('📦 Nuevo nombre:', nombre)
-  console.log('🔐 Nuevo rol_id:', rol_id)
 
   if (!nombre || !rol_id) {
     return res.status(400).json({ message: 'Nombre y rol son obligatorios' })
   }
 
-  const query = 'UPDATE usuarios SET nombre = ?, rol_id = ? WHERE id_usuario = ?'
-  db.query(query, [nombre, rol_id, id], (err, result) => {
-    if (err) {
-      console.error('❌ Error al actualizar usuario:', err)
-      return res.status(500).json({ message: 'Error al actualizar usuario' })
+  try {
+    let query = 'UPDATE usuarios SET nombre = ?, rol_id = ?'
+    const params = [nombre, rol_id]
+
+    if (password && password.trim() !== '') {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      query += ', password = ?'
+      params.push(hashedPassword)
     }
 
-    console.log('🔁 Resultado del UPDATE:', result)
+    query += ' WHERE id_usuario = ?'
+    params.push(id)
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado' })
-    }
+    db.query(query, params, (err, result) => {
+      if (err) return res.status(500).json({ message: 'Error al actualizar usuario' })
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Usuario no encontrado' })
+      }
+      res.json({ message: 'Usuario actualizado correctamente' })
+    })
+  } catch (err) {
+    res.status(500).json({ message: 'Error al procesar actualización' })
+  }
+})
 
-    res.json({ message: 'Usuario actualizado correctamente' })
+// ✅ GET /api/roles → Lista de roles
+router.get('/roles', (req, res) => {
+  db.query('SELECT id, nombre FROM roles', (err, results) => {
+    if (err) return res.status(500).json({ message: 'Error al obtener roles' })
+    res.json(results)
   })
 })
 
