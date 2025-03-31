@@ -10,6 +10,7 @@ export default function Eventos() {
   const [idUsuario, setIdUsuario] = useState('monitor01')
   const [eventos, setEventos] = useState([])
   const [historialCritico, setHistorialCritico] = useState([])
+  const [rolUsuario, setRolUsuario] = useState('')
   const [filtro, setFiltro] = useState({
     tipo: '',
     dispositivo: '',
@@ -34,14 +35,20 @@ export default function Eventos() {
 
   const dispositivosSimulados = ['TL280-001', 'TL280-002', 'TL280-003', 'TL280-004']
 
-  // Recuperar nombre de usuario del localStorage
+  // Recuperar usuario y rol
   useEffect(() => {
     const nombre = localStorage.getItem('vigilium_user')
     const id = localStorage.getItem('vigilium_user_id')
+    const token = localStorage.getItem('vigilium_token')
     if (nombre) setNombreUsuario(nombre)
     if (id) setIdUsuario(id)
+    if (token) {
+      const decoded = JSON.parse(atob(token.split('.')[1]))
+      setRolUsuario(decoded.rol)
+    }
   }, [])
 
+  // Simulación de eventos
   useEffect(() => {
     const audio = new Audio('/criticalalert.mp3')
 
@@ -70,21 +77,19 @@ export default function Eventos() {
     return () => clearInterval(intervalo)
   }, [])
 
+  // Scroll inteligente
   useEffect(() => {
     const log = logRef.current
     if (!log) return
-
     const isAtBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 50
-    if (isAtBottom) {
-      log.scrollTop = log.scrollHeight
-    }
+    if (isAtBottom) log.scrollTop = log.scrollHeight
   }, [eventos])
 
-  // Escuchar eventos atendidos por otros monitoristas
+  // Sockets
   useEffect(() => {
     socket.on('eventoAtendido', (evento) => {
-      setEventos((prev) => prev.filter(e => e.id !== evento.id))
-      setHistorialCritico((prev) => [evento, ...prev])
+      setEventos(prev => prev.filter(e => e.id !== evento.id))
+      setHistorialCritico(prev => [evento, ...prev])
     })
 
     socket.on('actualizarDescripcion', (eventoActualizado) => {
@@ -95,6 +100,7 @@ export default function Eventos() {
 
     return () => {
       socket.off('eventoAtendido')
+      socket.off('actualizarDescripcion')
     }
   }, [])
 
@@ -107,29 +113,33 @@ export default function Eventos() {
         atendidoPorId: idUsuario,
         descripcionAtencion: detalle,
       }
-
       setHistorialCritico(prev => [eventoConUsuario, ...prev])
       setEventos(prev => prev.filter(e => e.id !== id))
       socket.emit('marcarAtendido', eventoConUsuario)
     }
   }
 
-
-
   const eventosFiltrados = eventos.filter(e => {
     const coincideTipo = !filtro.tipo || e.tipo === filtro.tipo
     const coincideDispositivo = !filtro.dispositivo || e.dispositivo === filtro.dispositivo
-
     const eventoFecha = new Date(e.fecha)
     const desde = filtro.fechaInicio ? new Date(filtro.fechaInicio) : null
     const hasta = filtro.fechaFin ? new Date(filtro.fechaFin) : null
-
     const dentroDeRango =
       (!desde || eventoFecha >= desde) &&
       (!hasta || eventoFecha <= hasta)
-
     return coincideTipo && coincideDispositivo && dentroDeRango
   })
+
+  // 🔒 Acceso solo para monitoristas
+  if (rolUsuario && rolUsuario !== 'monitorista') {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold text-red-600">⛔ Acceso denegado</h1>
+        <p className="mt-2 text-gray-600">Esta sección es exclusiva para monitoristas.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 bg-[#f9fafb] min-h-screen">
@@ -139,30 +149,22 @@ export default function Eventos() {
       <EventsFilter filtro={filtro} setFiltro={setFiltro} dispositivos={dispositivosSimulados} />
 
       {/* Eventos activos */}
-      <div
-        ref={logRef}
-        className="bg-white h-[400px] overflow-y-auto rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm"
-      >
+      <div ref={logRef} className="bg-white h-[400px] overflow-y-auto rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm">
         {eventosFiltrados.map(evento => (
-          <div
-            key={evento.id}
-            className="bg-gray-50 p-3 rounded-md shadow-sm border border-gray-100"
-          >
+          <div key={evento.id} className="bg-gray-50 p-3 rounded-md shadow-sm border border-gray-100">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">{evento.hora}</span>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full
                 ${evento.tipo === 'ALERTA CRÍTICA'
                   ? 'bg-red-100 text-red-800'
                   : 'bg-blue-100 text-blue-800'
-                }`}
-              >
+                }`}>
                 {evento.tipo}
               </span>
             </div>
             <div className="mt-1 text-gray-800 text-sm">
               <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
             </div>
-
             {evento.tipo === 'ALERTA CRÍTICA' && (
               <button
                 onClick={() => {
@@ -177,7 +179,8 @@ export default function Eventos() {
           </div>
         ))}
       </div>
-      
+
+      {/* Modal de atención */}
       {mostrarModal && eventoSeleccionado && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-md border">
@@ -185,7 +188,6 @@ export default function Eventos() {
             <p className="text-sm text-gray-600 mb-4">
               <strong className="text-primary">{eventoSeleccionado.dispositivo}</strong> - {eventoSeleccionado.descripcion}
             </p>
-
             <textarea
               value={respuestaMonitorista}
               onChange={(e) => setRespuestaMonitorista(e.target.value)}
@@ -193,7 +195,6 @@ export default function Eventos() {
               rows={4}
               placeholder="Describe la acción tomada..."
             />
-
             <div className="mt-4 flex justify-end gap-3">
               <button
                 onClick={() => setMostrarModal(false)}
