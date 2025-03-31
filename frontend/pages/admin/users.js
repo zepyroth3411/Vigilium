@@ -98,7 +98,10 @@ export default function UserManagement() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ nombre: editNombre, rol_id: editRolId }),
+        body: JSON.stringify({
+          nombre: editNombre,
+          rol_id: parseInt(editRolId), // 👈 Esto es importante
+        }),
       })
   
       if (!res.ok) throw new Error('No se pudo actualizar el usuario')

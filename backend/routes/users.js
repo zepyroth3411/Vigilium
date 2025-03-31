@@ -89,13 +89,23 @@ router.put('/usuarios/:id', verificarAdmin, (req, res) => {
   const { nombre, rol_id } = req.body
   const { id } = req.params
 
+  // 🔍 Log para ver qué está llegando
+  console.log('🛠️ Editar usuario -> ID:', id)
+  console.log('📦 Nuevo nombre:', nombre)
+  console.log('🔐 Nuevo rol_id:', rol_id)
+
   if (!nombre || !rol_id) {
     return res.status(400).json({ message: 'Nombre y rol son obligatorios' })
   }
 
   const query = 'UPDATE usuarios SET nombre = ?, rol_id = ? WHERE id_usuario = ?'
   db.query(query, [nombre, rol_id, id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error al actualizar usuario' })
+    if (err) {
+      console.error('❌ Error al actualizar usuario:', err)
+      return res.status(500).json({ message: 'Error al actualizar usuario' })
+    }
+
+    console.log('🔁 Resultado del UPDATE:', result)
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
@@ -104,6 +114,5 @@ router.put('/usuarios/:id', verificarAdmin, (req, res) => {
     res.json({ message: 'Usuario actualizado correctamente' })
   })
 })
-
 
 module.exports = router
