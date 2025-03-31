@@ -1,8 +1,3 @@
-import WelcomeCard from '@/components/dashboard/WelcomeCard'
-import SystemStatus from '@/components/dashboard/SystemStatus'
-import SummaryCards from '@/components/dashboard/SummaryCards'
-import RecentEvents from '@/components/dashboard/RecentEvents'
-import QuickActions from '@/components/dashboard/QuickActions'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
@@ -11,15 +6,15 @@ export default function DashboardRedirect() {
 
   useEffect(() => {
     const token = localStorage.getItem('vigilium_token')
-
     if (!token) {
       router.push('/login')
       return
     }
-
+  
     try {
       const decoded = JSON.parse(atob(token.split('.')[1]))
-
+      console.log('🔍 Rol detectado:', decoded.rol) // 👈 AÑADE ESTA LÍNEA
+  
       switch (decoded.rol) {
         case 'admin':
           router.push('/dashboard/admin')
