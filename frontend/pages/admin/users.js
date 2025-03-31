@@ -13,6 +13,7 @@ export default function UserManagement() {
   const [editNombre, setEditNombre] = useState('')
   const [editRolId, setEditRolId] = useState('')
   const [editPassword, setEditPassword] = useState('')
+  const [rolId, setRolId] = useState('')
 
   const router = useRouter()
 

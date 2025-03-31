@@ -21,33 +21,40 @@ router.post('/login', (req, res) => {
 
   db.query(query, [id_usuario], async (err, results) => {
     if (err) return res.status(500).json({ message: 'Error de base de datos' })
-
+  
     if (results.length === 0) {
+      console.log('❌ Usuario no encontrado')
       return res.status(401).json({ message: 'Usuario no encontrado' })
     }
-
+  
     const usuario = results[0]
-
+    console.log('🔍 Usuario encontrado:', usuario)
+  
     // Validar contraseña
-    const isMatch = await bcrypt.compare(password, usuario.password)
+    console.log('🔑 Comparando:', password, 'vs', usuario.password)
+    const isMatch = await bcrypt.compare(password.trim(), usuario.password)
+  
     if (!isMatch) {
+      console.log('❌ Contraseña incorrecta')
       return res.status(401).json({ message: 'Contraseña incorrecta' })
     }
-
-    // ✅ Generar token con nombre del rol
+  
     const token = jwt.sign(
       {
         id: usuario.id,
         id_usuario: usuario.id_usuario,
         nombre: usuario.nombre,
-        rol: usuario.rol_nombre, // 👈 aquí va el nombre del rol (ej. "admin")
+        rol: usuario.rol_nombre,
       },
       process.env.JWT_SECRET || 'vigilium_secret_2025',
       { expiresIn: '2h' }
     )
-
+  
+    console.log('✅ Token generado:', token)
+  
     res.json({ token })
   })
+  
 })
 
 module.exports = router
