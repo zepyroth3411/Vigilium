@@ -3,7 +3,9 @@ import EventsFilter from '@/components/events/EventsFilter'
 import socket from '@/utils/socket'
 
 export default function Eventos() {
-
+  const [mostrarModal, setMostrarModal] = useState(false)
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null)
+  const [respuestaMonitorista, setRespuestaMonitorista] = useState('')
   const [nombreUsuario, setNombreUsuario] = useState('Monitorista')
   const [idUsuario, setIdUsuario] = useState('monitor01')
   const [eventos, setEventos] = useState([])
@@ -84,7 +86,7 @@ export default function Eventos() {
       setEventos((prev) => prev.filter(e => e.id !== evento.id))
       setHistorialCritico((prev) => [evento, ...prev])
     })
-    
+
     socket.on('actualizarDescripcion', (eventoActualizado) => {
       setHistorialCritico(prev =>
         prev.map(e => e.id === eventoActualizado.id ? eventoActualizado : e)
@@ -96,26 +98,23 @@ export default function Eventos() {
     }
   }, [])
 
-  const marcarComoAtendido = (id) => {
+  const marcarComoAtendido = (id, detalle) => {
     const evento = eventos.find(e => e.id === id)
     if (evento) {
-      const descripcionAtencion = prompt("¿Cómo se atendió este evento?")
-
-      if (!descripcionAtencion) return // Cancelado
-
       const eventoConUsuario = {
         ...evento,
         atendidoPor: nombreUsuario,
-        idUsuario: localStorage.getItem('vigilium_user_id'),
-        descripcionAtencion
+        atendidoPorId: idUsuario,
+        descripcionAtencion: detalle,
       }
 
       setHistorialCritico(prev => [eventoConUsuario, ...prev])
       setEventos(prev => prev.filter(e => e.id !== id))
-
       socket.emit('marcarAtendido', eventoConUsuario)
     }
   }
+
+
 
   const eventosFiltrados = eventos.filter(e => {
     const coincideTipo = !filtro.tipo || e.tipo === filtro.tipo
@@ -166,7 +165,10 @@ export default function Eventos() {
 
             {evento.tipo === 'ALERTA CRÍTICA' && (
               <button
-                onClick={() => marcarComoAtendido(evento.id)}
+                onClick={() => {
+                  setEventoSeleccionado(evento)
+                  setMostrarModal(true)
+                }}
                 className="mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition"
               >
                 ✔ Marcar como atendido
@@ -175,6 +177,44 @@ export default function Eventos() {
           </div>
         ))}
       </div>
+      
+      {mostrarModal && eventoSeleccionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-md border">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">📝 ¿Cómo se atendió el evento?</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              <strong className="text-primary">{eventoSeleccionado.dispositivo}</strong> - {eventoSeleccionado.descripcion}
+            </p>
+
+            <textarea
+              value={respuestaMonitorista}
+              onChange={(e) => setRespuestaMonitorista(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              rows={4}
+              placeholder="Describe la acción tomada..."
+            />
+
+            <div className="mt-4 flex justify-end gap-3">
+              <button
+                onClick={() => setMostrarModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  marcarComoAtendido(eventoSeleccionado.id, respuestaMonitorista)
+                  setMostrarModal(false)
+                  setRespuestaMonitorista('')
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Historial */}
       {historialCritico.length > 0 && (
@@ -197,7 +237,7 @@ export default function Eventos() {
                     📝 {evento.descripcionAtencion}
                   </div>
                 )}
-                {evento.idUsuario === localStorage.getItem('vigilium_user_id') && (
+                {evento.atendidoPorId === idUsuario && (
                   <button
                     onClick={() => {
                       const nuevaDescripcion = prompt("Editar cómo se atendió:", evento.descripcionAtencion || '')
