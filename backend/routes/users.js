@@ -3,6 +3,8 @@ const router = express.Router()
 const db = require('../db')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const verificarToken = require('../middlewares/authMiddleware')
+const permitirRoles = require('../middlewares/roleMiddleware')
 
 // Middleware para verificar token y rol admin
 function verificarAdmin(req, res, next) {
@@ -103,6 +105,11 @@ router.get('/roles', (req, res) => {
     if (err) return res.status(500).json({ message: 'Error al obtener roles' })
     res.json(results)
   })
+})
+
+// Solo los admins pueden acceder a esto
+router.get('/usuarios', verificarToken, permitirRoles('admin'), (req, res) => {
+  res.json({ message: 'Solo el admin ve esto 😎' })
 })
 
 module.exports = router

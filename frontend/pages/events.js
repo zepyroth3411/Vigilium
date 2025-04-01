@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import EventsFilter from '@/components/events/EventsFilter'
+import { tienePermiso } from '@/utils/permissions' // Asegúrate de tener esto arriba
 import socket from '@/utils/socket'
 
 export default function Eventos() {
@@ -132,11 +133,11 @@ export default function Eventos() {
   })
 
   // 🔒 Acceso solo para monitoristas
-  if (rolUsuario && rolUsuario !== 'monitorista') {
+  if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">⛔ Acceso denegado</h1>
-        <p className="mt-2 text-gray-600">Esta sección es exclusiva para monitoristas.</p>
+        <p className="mt-2 text-gray-600">No tienes permiso para ver esta sección.</p>
       </div>
     )
   }
@@ -165,7 +166,7 @@ export default function Eventos() {
             <div className="mt-1 text-gray-800 text-sm">
               <strong className="text-primary">{evento.dispositivo}</strong> - {evento.descripcion}
             </div>
-            {evento.tipo === 'ALERTA CRÍTICA' && (
+            {tienePermiso(rolUsuario, 'atender_eventos') && evento.tipo === 'ALERTA CRÍTICA' && (
               <button
                 onClick={() => {
                   setEventoSeleccionado(evento)
