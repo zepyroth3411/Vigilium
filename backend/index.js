@@ -5,6 +5,7 @@ require('dotenv').config()
 const cors = require('cors')
 const authRoutes = require('./routes/auth')
 const userRoutes = require('./routes/users')
+const passwordRoutes = require('./routes/password')
 
 const app = express()
 const server = http.createServer(app) // Creamos servidor HTTP para usar con Socket.IO
@@ -24,6 +25,7 @@ app.use(express.json())
 // Rutas
 app.use('/api', authRoutes)
 app.use('/api', userRoutes)
+app.use('/api', passwordRoutes)
 
 // Socket.IO
 io.on('connection', (socket) => {

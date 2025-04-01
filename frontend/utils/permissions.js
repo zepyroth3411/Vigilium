@@ -6,7 +6,7 @@ const permisosPorRol = {
     'editar_descripcion_evento',
     'ver_dispositivos',
     'ver_clientes',
-    'cambiar_contraseña',
+    'cambiar_password',
   ],
   // técnico, admin y supervisor los agregaremos conforme avancemos
 }
