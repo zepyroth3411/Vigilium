@@ -1,10 +1,18 @@
-export const permisos = {
-  admin: ['ver_eventos', 'editar_eventos', 'ver_dispositivos', 'ver_clientes', 'administrar_usuarios'],
-  monitorista: ['ver_eventos', 'editar_eventos', 'ver_dispositivos', 'ver_clientes'],
-  tecnico: ['ver_dispositivos', 'ver_clientes'],
-  supervisor: ['ver_eventos', 'ver_dispositivos', 'ver_clientes'],
+const permisosPorRol = {
+  monitorista: [
+    'ver_dashboard',
+    'ver_eventos',
+    'atender_eventos',
+    'editar_descripcion_evento',
+    'ver_dispositivos',
+    'ver_clientes',
+    'cambiar_contraseña',
+  ],
+  // técnico, admin y supervisor los agregaremos conforme avancemos
 }
 
-export function tienePermiso(rol, permiso) {
-  return permisos[rol]?.includes(permiso)
+export const tienePermiso = (rol, permiso) => {
+  return permisosPorRol[rol]?.includes(permiso)
 }
+
+

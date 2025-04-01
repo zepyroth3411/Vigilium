@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import EventsFilter from '@/components/events/EventsFilter'
 import { tienePermiso } from '@/utils/permissions'
 import socket from '@/utils/socket'
-import AccesoDenegado from '@/components/common/AccesoDenegado' 
+import AccessDenied from '@/components/common/AccessDenied'
 
 
 export default function Eventos() {
@@ -134,9 +134,9 @@ export default function Eventos() {
     return coincideTipo && coincideDispositivo && dentroDeRango
   })
 
-  
+
   if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
-    return <AccesoDenegado />
+    return <AccessDenied/>
   }
 
   return (
@@ -236,7 +236,7 @@ export default function Eventos() {
                     📝 {evento.descripcionAtencion}
                   </div>
                 )}
-                {evento.atendidoPorId === idUsuario && (
+                {evento.atendidoPorId === idUsuario && tienePermiso(rolUsuario, 'editar_descripcion_evento') && (
                   <button
                     onClick={() => {
                       const nuevaDescripcion = prompt("Editar cómo se atendió:", evento.descripcionAtencion || '')

@@ -1,7 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { tienePermiso } from '@/utils/permissions'
+import AccessDenied from '@/components/common/AccessDenied'
 
 export default function Dispositivos() {
+  const [rolUsuario, setRolUsuario] = useState('')
   const [filtro, setFiltro] = useState('todos')
+  const router = useRouter()
+
+  useEffect(() => {
+    const token = localStorage.getItem('vigilium_token')
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]))
+        setRolUsuario(decoded.rol)
+      } catch (err) {
+        console.error('Token inválido', err)
+        router.push('/login')
+      }
+    } else {
+      router.push('/login')
+    }
+  }, [])
+
+  // 🔒 Validar permisos
+  if (rolUsuario && !tienePermiso(rolUsuario, 'ver_dispositivos')) {
+    return <AccessDenied />
+  }
 
   const dispositivos = [
     { id: 'TL280-001', cliente: 'Juan Pérez', estado: 'conectado', ultima: '2025-03-29 08:23' },
@@ -56,8 +81,8 @@ export default function Dispositivos() {
                 <td className="p-3">
                   <span className={`px-2 py-1 text-xs rounded-full font-semibold capitalize
                     ${d.estado === 'conectado' ? 'bg-green-100 text-green-700'
-                    : d.estado === 'desconectado' ? 'bg-red-100 text-red-700'
-                    : 'bg-yellow-100 text-yellow-700'}`}>
+                      : d.estado === 'desconectado' ? 'bg-red-100 text-red-700'
+                      : 'bg-yellow-100 text-yellow-700'}`}>
                     {d.estado}
                   </span>
                 </td>
