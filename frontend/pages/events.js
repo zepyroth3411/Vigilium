@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import EventsFilter from '@/components/events/EventsFilter'
-import { tienePermiso } from '@/utils/permissions' // Asegúrate de tener esto arriba
+import { tienePermiso } from '@/utils/permissions'
 import socket from '@/utils/socket'
+import AccesoDenegado from '@/components/common/AccesoDenegado' 
+
 
 export default function Eventos() {
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -132,14 +134,9 @@ export default function Eventos() {
     return coincideTipo && coincideDispositivo && dentroDeRango
   })
 
-  // 🔒 Acceso solo para monitoristas
+  
   if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold text-red-600">⛔ Acceso denegado</h1>
-        <p className="mt-2 text-gray-600">No tienes permiso para ver esta sección.</p>
-      </div>
-    )
+    return <AccesoDenegado />
   }
 
   return (
