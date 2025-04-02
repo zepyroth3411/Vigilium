@@ -8,6 +8,16 @@ const permisosPorRol = {
     'ver_clientes',
     'cambiar_password',
   ],
+
+  tecnico: [
+    'ver_dispositivos',
+    'crear_dispositivo',
+    'editar_dispositivo',
+    'ver_clientes',
+    'crear_cliente',
+    'editar_cliente',
+    'cambiar_password'
+  ],
   // técnico, admin y supervisor los agregaremos conforme avancemos
 }
 
