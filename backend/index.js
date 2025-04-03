@@ -6,6 +6,9 @@ const cors = require('cors')
 const authRoutes = require('./routes/auth')
 const userRoutes = require('./routes/users')
 const passwordRoutes = require('./routes/password')
+const deviceRoutes = require('./routes/device')
+const clienteRoutes = require('./routes/client');
+
 
 const app = express()
 const server = http.createServer(app) // Creamos servidor HTTP para usar con Socket.IO
@@ -26,6 +29,8 @@ app.use(express.json())
 app.use('/api', authRoutes)
 app.use('/api', userRoutes)
 app.use('/api', passwordRoutes)
+app.use('/api', deviceRoutes)
+app.use('/api', clienteRoutes)
 
 // Socket.IO
 io.on('connection', (socket) => {
