@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { tienePermiso } from '@/utils/permissions'
 import AccessDenied from '@/components/common/AccessDenied'
+import DiagnosticModal from '@/components/devices/DiagnosticModal'
 
 export default function Dispositivos() {
   const [rolUsuario, setRolUsuario] = useState('')
   const [filtro, setFiltro] = useState('todos')
   const router = useRouter()
+  const [dispositivoSeleccionado, setDispositivoSeleccionado] = useState(null)
+  const [mostrarDiagnostico, setMostrarDiagnostico] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('vigilium_token')
@@ -82,19 +85,34 @@ export default function Dispositivos() {
                   <span className={`px-2 py-1 text-xs rounded-full font-semibold capitalize
                     ${d.estado === 'conectado' ? 'bg-green-100 text-green-700'
                       : d.estado === 'desconectado' ? 'bg-red-100 text-red-700'
-                      : 'bg-yellow-100 text-yellow-700'}`}>
+                        : 'bg-yellow-100 text-yellow-700'}`}>
                     {d.estado}
                   </span>
                 </td>
                 <td className="p-3">{d.ultima}</td>
                 <td className="p-3">
-                  <button className="text-sm text-primary hover:underline">Ver detalles</button>
+                  <button
+                    onClick={() => {
+                      setDispositivoSeleccionado(d)
+                      setMostrarDiagnostico(true)
+                    }}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Ver detalles
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {mostrarDiagnostico && dispositivoSeleccionado && (
+        <DiagnosticModal
+          dispositivo={dispositivoSeleccionado}
+          onClose={() => setMostrarDiagnostico(false)}
+        />
+      )}
     </div>
   )
 }
