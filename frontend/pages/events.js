@@ -53,32 +53,34 @@ export default function Eventos() {
 
   // Simulación de eventos
   useEffect(() => {
-    const audio = new Audio('/criticalalert.mp3')
+    socket.on('nuevoEvento', (evento) => {
+      const esCritico = evento.nivel_critico === 'crítico'
+      const hora = new Date(evento.fecha_hora).toLocaleTimeString()
 
-    const intervalo = setInterval(() => {
-      const descripcion = eventosSimulados[Math.floor(Math.random() * eventosSimulados.length)]
-      const esCritico = ['FUEGO', 'MÉDICA', 'ROBO'].includes(descripcion)
-
-      const nuevoEvento = {
-        id: Date.now(),
+      const nuevo = {
+        id: evento.id,
         tipo: esCritico ? 'ALERTA CRÍTICA' : 'NOTIFICACIÓN',
-        descripcion,
-        hora: new Date().toLocaleTimeString(),
-        dispositivo: dispositivosSimulados[Math.floor(Math.random() * dispositivosSimulados.length)],
+        descripcion: evento.descripcion,
+        hora,
+        dispositivo: evento.id_dispositivo,
         atendido: false
       }
 
-      setEventos(prev => [...prev.slice(-49), nuevoEvento])
+      setEventos(prev => [...prev.slice(-49), nuevo])
 
       if (esCritico) {
+        const audio = new Audio('/criticalalert.mp3')
         audio.play().catch(err => {
           console.warn('⚠️ No se pudo reproducir sonido:', err)
         })
       }
-    }, 3000)
+    })
 
-    return () => clearInterval(intervalo)
+    return () => {
+      socket.off('nuevoEvento')
+    }
   }, [])
+
 
   // Scroll inteligente
   useEffect(() => {
@@ -136,7 +138,7 @@ export default function Eventos() {
 
 
   if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
-    return <AccessDenied/>
+    return <AccessDenied />
   }
 
   return (

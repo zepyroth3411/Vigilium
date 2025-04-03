@@ -7,7 +7,11 @@ const authRoutes = require('./routes/auth')
 const userRoutes = require('./routes/users')
 const passwordRoutes = require('./routes/password')
 const deviceRoutes = require('./routes/device')
-const clienteRoutes = require('./routes/client');
+const clienteRoutes = require('./routes/client')
+const eventRoutes = require('./routes/event')
+
+
+
 
 
 const app = express()
@@ -18,6 +22,8 @@ const io = new Server(server, {
     methods: ['GET', 'POST', 'PUT']
   }
 })
+
+app.set('io',io)
 
 const PORT = process.env.PORT || 4000
 
@@ -31,6 +37,7 @@ app.use('/api', userRoutes)
 app.use('/api', passwordRoutes)
 app.use('/api', deviceRoutes)
 app.use('/api', clienteRoutes)
+app.use('/api', eventRoutes)
 
 // Socket.IO
 io.on('connection', (socket) => {
