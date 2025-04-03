@@ -63,16 +63,24 @@ router.put('/devices/:id', verifyToken, (req, res) => {
   })
 
 // DELETE /api/devices/:id - Eliminar un dispositivo
+// DELETE /api/devices/:id
 router.delete('/devices/:id', verifyToken, (req, res) => {
   const id = req.params.id
 
-  const sql = 'DELETE FROM dispositivos WHERE id_dispositivo = ?'
-  db.query(sql, [id], (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error al eliminar dispositivo' })
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Dispositivo no encontrado' })
-    }
-    res.json({ message: 'Dispositivo eliminado correctamente' })
+  // Primero borra los eventos relacionados
+  const sqlBorrarEventos = 'DELETE FROM eventos WHERE id_dispositivo = ?'
+  db.query(sqlBorrarEventos, [id], (err) => {
+    if (err) return res.status(500).json({ message: 'Error al borrar eventos relacionados' })
+
+    // Luego borra el dispositivo
+    const sqlBorrarDispositivo = 'DELETE FROM dispositivos WHERE id_dispositivo = ?'
+    db.query(sqlBorrarDispositivo, [id], (err, result) => {
+      if (err) return res.status(500).json({ message: 'Error al eliminar dispositivo' })
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Dispositivo no encontrado' })
+      }
+      res.json({ message: 'Dispositivo eliminado correctamente' })
+    })
   })
 })
   

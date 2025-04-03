@@ -88,11 +88,40 @@ export default function Dispositivos() {
     }
   }
 
+  const handleToggleRecepcion = async (id, nuevoEstado) => {
+    const token = localStorage.getItem('vigilium_token')
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/devices/${id}/estado`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ recibir_eventos: nuevoEstado })
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message)
+
+      // Actualiza el dispositivo localmente
+      setDispositivos(prev =>
+        prev.map(d =>
+          d.id_dispositivo === id ? { ...d, recibir_eventos: nuevoEstado } : d
+        )
+      )
+    } catch (err) {
+      console.error('❌ Error al cambiar estado de recepción:', err)
+      alert('No se pudo cambiar el estado de recepción del dispositivo')
+    }
+  }
+
+
   return (
+
     <div className="p-6 bg-white min-h-screen">
       <h1 className="text-3xl font-bold text-primary">Dispositivos</h1>
       <p className="text-gray-600 mt-1">Monitoreo de comunicadores TL280 asignados a clientes</p>
-
       {/* Filtros + botón */}
       <div className="mt-6 mb-4 flex flex-wrap justify-between items-center">
         <div className="space-x-2">
@@ -133,6 +162,7 @@ export default function Dispositivos() {
               <th className="p-3 text-left">Cliente</th>
               <th className="p-3 text-left">Estado</th>
               <th className="p-3 text-left">Última señal</th>
+              <th className="p-3 text-left">Recibe eventos</th> {/* NUEVA COLUMNA */}
               <th className="p-3 text-left">Acciones</th>
             </tr>
           </thead>
@@ -151,37 +181,64 @@ export default function Dispositivos() {
                     </span>
                   </td>
                   <td className="p-3">{d.ultima_senal || '—'}</td>
-                  <td className="p-3 space-x-2">
-                    <button
-                      onClick={() => {
-                        setDispositivoSeleccionado(d)
-                        setMostrarDiagnostico(true)
-                      }}
-                      className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-200 transition"
-                    >
-                      🔍 Ver detalles
-                    </button>
-
-                    {tienePermiso(rolUsuario, 'editar_dispositivo') && (
+                  <td className="p-3 text-sm font-medium">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold 
+                       ${d.recibir_eventos ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {d.recibir_eventos ? 'Sí' : 'No'}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {/* 🔍 Ver detalles */}
                       <button
                         onClick={() => {
-                          setModoEdicion(d)
-                          setMostrarFormulario(true)
+                          setDispositivoSeleccionado(d)
+                          setMostrarDiagnostico(true)
                         }}
-                        className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition"
+                        className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-200 transition h-8"
                       >
-                        ✏️ Editar
+                        🔍 Ver detalles
                       </button>
-                    )}
 
-                    {tienePermiso(rolUsuario, 'editar_dispositivo') && (
-                      <button
-                        onClick={() => handleEliminarDispositivo(d.id_dispositivo)}
-                        className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full hover:bg-red-200 transition"
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    )}
+                      {tienePermiso(rolUsuario, 'editar_dispositivo') && (
+                        <>
+                          {/* ✏️ Editar */}
+                          <button
+                            onClick={() => {
+                              setModoEdicion(d)
+                              setMostrarFormulario(true)
+                            }}
+                            className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition h-8"
+                          >
+                            ✏️ Editar
+                          </button>
+
+                          {/* 🗑 Eliminar */}
+                          <button
+                            onClick={() => handleEliminarDispositivo(d.id_dispositivo)}
+                            className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full hover:bg-red-200 transition h-8"
+                          >
+                            🗑 Eliminar
+                          </button>
+
+                          {/* ✅ Toggle */}
+                          <div className="relative inline-block w-11 h-6 ml-1">
+                            <input
+                              type="checkbox"
+                              id={`switch-${d.id_dispositivo}`}
+                              className="peer sr-only"
+                              checked={d.recibir_eventos}
+                              onChange={() => handleToggleRecepcion(d.id_dispositivo, !d.recibir_eventos)}
+                            />
+                            <div className="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-green-500 transition-colors duration-300"></div>
+                            <label
+                              htmlFor={`switch-${d.id_dispositivo}`}
+                              className="absolute left-1 top-1 w-4 h-4 bg-white border border-slate-300 rounded-full shadow-sm transition-transform duration-300 peer-checked:translate-x-5 cursor-pointer"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
