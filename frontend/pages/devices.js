@@ -37,15 +37,19 @@ export default function Dispositivos() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resDispositivos = await fetch('http://localhost:4000/api/devices')
+        const resDispositivos = await fetch('http://localhost:4000/api/devices', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('vigilium_token')}`
+          }
+        })
         const dispositivosData = await resDispositivos.json()
-        setDispositivos(dispositivosData)
+        setDispositivos(Array.isArray(dispositivosData) ? dispositivosData : [])
 
         const resClientes = await fetch('http://localhost:4000/api/clientes')
         const clientesData = await resClientes.json()
-        setClientes(clientesData)
+        setClientes(Array.isArray(clientesData) ? clientesData : [])
       } catch (err) {
-        console.error('Error cargando datos:', err)
+        console.error('🔥 Error cargando datos:', err)
       }
     }
 
@@ -61,10 +65,33 @@ export default function Dispositivos() {
     ? (filtro === 'todos' ? dispositivos : dispositivos.filter(d => d.estado === filtro))
     : []
 
+  const handleEliminarDispositivo = async (id_dispositivo) => {
+    const confirmar = confirm(`¿Estás seguro de eliminar el dispositivo ${id_dispositivo}?`)
+    if (!confirmar) return
+
+    try {
+      const token = localStorage.getItem('vigilium_token')
+      const res = await fetch(`http://localhost:4000/api/devices/${id_dispositivo}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message)
+
+      // Actualizar lista en frontend
+      setDispositivos(dispositivos.filter(d => d.id_dispositivo !== id_dispositivo))
+    } catch (err) {
+      alert('Error al eliminar dispositivo: ' + err.message)
+    }
+  }
+
   return (
     <div className="p-6 bg-white min-h-screen">
       <h1 className="text-3xl font-bold text-primary">Dispositivos</h1>
-      <p className="text-gray-600 mt-1">Luego poner texto aqui </p>
+      <p className="text-gray-600 mt-1">Monitoreo de comunicadores TL280 asignados a clientes</p>
 
       {/* Filtros + botón */}
       <div className="mt-6 mb-4 flex flex-wrap justify-between items-center">
@@ -74,7 +101,7 @@ export default function Dispositivos() {
               key={est}
               onClick={() => setFiltro(est)}
               className={`px-3 py-1 rounded-full text-sm border font-medium transition
-          ${filtro === est
+                ${filtro === est
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                 }`}
@@ -97,10 +124,6 @@ export default function Dispositivos() {
         )}
       </div>
 
-
-
-
-
       {/* Tabla */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border">
         <table className="w-full text-sm">
@@ -114,7 +137,7 @@ export default function Dispositivos() {
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(filtrados) && filtrados.length > 0 ? (
+            {filtrados.length > 0 ? (
               filtrados.map((d, i) => (
                 <tr key={i} className="border-t hover:bg-gray-50">
                   <td className="p-3">{d.id_dispositivo}</td>
@@ -150,6 +173,15 @@ export default function Dispositivos() {
                         ✏️ Editar
                       </button>
                     )}
+
+                    {tienePermiso(rolUsuario, 'editar_dispositivo') && (
+                      <button
+                        onClick={() => handleEliminarDispositivo(d.id_dispositivo)}
+                        className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full hover:bg-red-200 transition"
+                      >
+                        🗑️ Eliminar
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -183,7 +215,12 @@ export default function Dispositivos() {
             setModoEdicion(null)
           }}
           onSuccess={async () => {
-            const res = await fetch('http://localhost:4000/api/devices')
+            const token = localStorage.getItem('vigilium_token')
+            const res = await fetch('http://localhost:4000/api/devices', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
             const data = await res.json()
             setDispositivos(data)
           }}

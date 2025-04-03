@@ -1,33 +1,61 @@
-// components/devices/DeviceFormModal.js
 import { useState, useEffect } from 'react'
 
-export default function DeviceFormModal({ onClose, onSave, clientes = [], initialData = {} }) {
+export default function DeviceFormModal({ onClose, onSuccess, clientes = [], dispositivo = null, modo }) {
   const [formData, setFormData] = useState({
     id_dispositivo: '',
-    nombre_cliente: '',
-    estado: 'desconectado',
-    ...initialData
+    nombre_dispositivo: '',
+    id_cliente: ''
   })
 
   useEffect(() => {
-    if (initialData) {
+    if (modo === 'editar' && dispositivo) {
       setFormData({
-        id_dispositivo: initialData.id_dispositivo || '',
-        nombre_cliente: initialData.nombre_cliente || '',
-        estado: initialData.estado || 'desconectado'
+        id_dispositivo: dispositivo.id_dispositivo || '',
+        nombre_dispositivo: dispositivo.nombre_dispositivo || '',
+        id_cliente: dispositivo.id_cliente || ''
       })
     }
-  }, [initialData])
+  }, [dispositivo, modo])
 
   const handleChange = e => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.id_dispositivo || !formData.nombre_cliente) return
-    onSave(formData)
+
+    if (!formData.id_dispositivo || !formData.nombre_dispositivo || !formData.id_cliente) {
+      alert('Todos los campos son obligatorios')
+      return
+    }
+
+    const token = localStorage.getItem('vigilium_token')
+
+    const url = modo === 'editar'
+      ? `http://localhost:4000/api/devices/${formData.id_dispositivo}`
+      : 'http://localhost:4000/api/devices'
+
+    const method = modo === 'editar' ? 'PUT' : 'POST'
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message)
+
+      onSuccess()
+      onClose()
+    } catch (err) {
+      alert('Error al guardar el dispositivo: ' + err.message)
+    }
   }
 
   return (
@@ -40,7 +68,7 @@ export default function DeviceFormModal({ onClose, onSave, clientes = [], initia
           ×
         </button>
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          {initialData.id_dispositivo ? '✏️ Editar Dispositivo' : '➕ Nuevo Dispositivo'}
+          {modo === 'crear' ? '➕ Nuevo Dispositivo' : '✏️ Editar Dispositivo'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-sm">
@@ -54,22 +82,36 @@ export default function DeviceFormModal({ onClose, onSave, clientes = [], initia
               maxLength={4}
               className="w-full border px-3 py-2 rounded"
               required
-              disabled={!!initialData.id_dispositivo}
+              disabled={modo === 'editar'}
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-gray-700">Cliente</label>
+            <label className="block mb-1 text-gray-700">Nombre del dispositivo</label>
+            <input
+              type="text"
+              name="nombre_dispositivo"
+              value={formData.nombre_dispositivo}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-gray-700">Cliente asignado</label>
             <select
-              name="nombre_cliente"
-              value={formData.nombre_cliente}
+              name="id_cliente"
+              value={formData.id_cliente}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
               required
             >
               <option value="">Seleccionar cliente</option>
-              {clientes.map((c, i) => (
-                <option key={i} value={c.nombre}>{c.nombre}</option>
+              {clientes.map((c) => (
+                <option key={c.id_cliente} value={c.id_cliente}>
+                  {c.nombre}
+                </option>
               ))}
             </select>
           </div>
@@ -77,9 +119,9 @@ export default function DeviceFormModal({ onClose, onSave, clientes = [], initia
           <div className="text-right mt-4">
             <button
               type="submit"
-               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
             >
-              💾 Guardar cambios
+              💾 Guardar
             </button>
           </div>
         </form>

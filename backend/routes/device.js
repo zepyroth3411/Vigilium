@@ -16,24 +16,29 @@ router.get('/devices', verifyToken, (req, res) => {
   })
 })
 
-// ✅ POST /api/devices - Crear un nuevo dispositivo
 router.post('/devices', verifyToken, (req, res) => {
-  const { id_dispositivo, id_cliente } = req.body
+  const { id_dispositivo, nombre_dispositivo, id_cliente } = req.body
 
-  if (!id_dispositivo || !id_cliente) {
+  console.log('📥 Dispositivo recibido:', req.body)
+
+  if (!id_dispositivo || !nombre_dispositivo || !id_cliente) {
     return res.status(400).json({ message: 'Faltan datos del dispositivo' })
   }
 
   const nuevo = {
     id_dispositivo,
+    nombre_dispositivo,
     id_cliente,
-    estado: 'desconectado',
-    recibir_eventos: true
+    estado: 'desconectado', // aunque tiene default, puedes dejarlo explícito
+    activo: true
   }
 
   const sql = 'INSERT INTO dispositivos SET ?'
   db.query(sql, nuevo, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error al crear dispositivo' })
+    if (err) {
+      console.error('❌ Error al insertar en DB:', err)
+      return res.status(500).json({ message: 'Error al crear dispositivo' })
+    }
     res.status(201).json({ message: 'Dispositivo creado correctamente', id: result.insertId })
   })
 })
@@ -57,19 +62,19 @@ router.put('/devices/:id', verifyToken, (req, res) => {
     })
   })
 
-  // DELETE /api/devices/:id - Eliminar un dispositivo
+// DELETE /api/devices/:id - Eliminar un dispositivo
 router.delete('/devices/:id', verifyToken, (req, res) => {
-    const id = req.params.id
-  
-    const sql = 'DELETE FROM dispositivos WHERE id_dispositivo = ?'
-    db.query(sql, [id], (err, result) => {
-      if (err) return res.status(500).json({ message: 'Error al eliminar dispositivo' })
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Dispositivo no encontrado' })
-      }
-      res.json({ message: 'Dispositivo eliminado correctamente' })
-    })
+  const id = req.params.id
+
+  const sql = 'DELETE FROM dispositivos WHERE id_dispositivo = ?'
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ message: 'Error al eliminar dispositivo' })
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Dispositivo no encontrado' })
+    }
+    res.json({ message: 'Dispositivo eliminado correctamente' })
   })
+})
   
 // PATCH /api/devices/:id/estado - Cambiar estado del dispositivo o si recibe eventos
 router.patch('/devices/:id/estado', verifyToken, (req, res) => {

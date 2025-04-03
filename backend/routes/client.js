@@ -12,17 +12,19 @@ router.get('/clientes', (req, res) => {
 
 // Crear nuevo cliente
 router.post('/clientes', (req, res) => {
-  const { nombre, direccion, telefono, contacto } = req.body;
-  if (!nombre || !direccion || !telefono || !contacto) {
+  console.log('[🧪 BACKEND] Body recibido:', req.body); // <-- AÑADE ESTO
+  const { nombre, direccion, telefono, correo } = req.body;
+
+  if (!nombre || !direccion || !telefono || !correo) {
     return res.status(400).json({ message: 'Todos los campos son obligatorios' });
   }
 
   db.query(
-    'INSERT INTO clientes (nombre, direccion, telefono, contacto) VALUES (?, ?, ?, ?)',
-    [nombre, direccion, telefono, contacto],
+    'INSERT INTO clientes (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)',
+    [nombre, direccion, telefono, correo],
     (err, result) => {
       if (err) return res.status(500).json({ message: 'Error al crear cliente' });
-      res.json({ id: result.insertId, nombre, direccion, telefono, contacto });
+      res.json({ id_cliente: result.insertId, nombre, direccion, telefono, correo });
     }
   );
 });
@@ -30,11 +32,11 @@ router.post('/clientes', (req, res) => {
 // Actualizar cliente
 router.put('/clientes/:id_cliente', (req, res) => {
   const { id_cliente } = req.params;
-  const { nombre, direccion, telefono, contacto } = req.body;
+  const { nombre, direccion, telefono, correo } = req.body;
 
   db.query(
-    'UPDATE clientes SET nombre = ?, direccion = ?, telefono = ?, contacto = ? WHERE id_cliente = ?',
-    [nombre, direccion, telefono, contacto, id_cliente],
+    'UPDATE clientes SET nombre = ?, direccion = ?, telefono = ?, correo = ? WHERE id_cliente = ?',
+    [nombre, direccion, telefono, correo, id_cliente],
     (err, result) => {
       if (err) return res.status(500).json({ message: 'Error al actualizar cliente' });
       if (result.affectedRows === 0) {
@@ -44,6 +46,7 @@ router.put('/clientes/:id_cliente', (req, res) => {
     }
   );
 });
+
 
 // Eliminar cliente
 router.delete('/clientes/:id_cliente', (req, res) => {
