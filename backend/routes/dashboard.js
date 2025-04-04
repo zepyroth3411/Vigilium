@@ -43,13 +43,17 @@ router.get('/dashboard', verifyToken, (req, res) => {
     const sql = `
       SELECT
         (SELECT COUNT(*) FROM dispositivos) AS total_dispositivos,
-        (SELECT COUNT(*) FROM clientes) AS total_clientes
+        (SELECT COUNT(*) FROM clientes) AS total_clientes,
+        (SELECT COUNT(*) FROM dispositivos WHERE estado = 'conectado') AS dispositivos_conectados,
+        (SELECT COUNT(*) FROM dispositivos WHERE estado = 'desconectado') AS dispositivos_desconectados
     `
+
     db.query(sql, (err, results) => {
       if (err) {
         console.error('❌ Error al consultar dashboard técnico:', err)
         return res.status(500).json({ message: 'Error al consultar dashboard técnico', error: err })
       }
+
       console.log('✅ Dashboard técnico listo:', results[0])
       res.json({ rol: 'tecnico', ...results[0] })
     })

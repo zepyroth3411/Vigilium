@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { tienePermiso } from '@/utils/permissions'
-import AccessDenied from '@/components/common/AccessDenied'
 import WelcomeCard from '@/components/dashboard/WelcomeCard'
-import SystemStatus from '@/components/dashboard/SystemStatus'
+import AccessDenied from '@/components/common/AccessDenied'
 import RecentEvents from '@/components/dashboard/RecentEvents'
+import RoleOverview from '@/components/dashboard/RoleOverview'
 
 export default function DashboardMonitorista() {
   const [rolUsuario, setRolUsuario] = useState('')
@@ -31,8 +31,8 @@ export default function DashboardMonitorista() {
 
   return (
     <div className="p-6 space-y-8 max-w-6xl mx-auto">
-      <WelcomeCard userRole="monitorista" />
-      <SystemStatus />
+      <WelcomeCard />
+      <RoleOverview />
       <section>
         <h2 className="text-xl font-semibold text-gray-800 mb-3">📌 Eventos Recientes</h2>
         <RecentEvents />
