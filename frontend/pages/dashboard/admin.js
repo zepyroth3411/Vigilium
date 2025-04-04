@@ -4,6 +4,7 @@ import SummaryCards from '@/components/dashboard/SummaryCards'
 import QuickActions from '@/components/dashboard/QuickActions'
 import RecentEvents from '@/components/dashboard/RecentEvents'
 
+
 export default function DashboardAdmin() {
   return (
     <div className="p-6 space-y-8 max-w-7xl mx-auto">
@@ -15,3 +16,4 @@ export default function DashboardAdmin() {
     </div>
   )
 }
+
