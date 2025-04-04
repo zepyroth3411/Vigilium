@@ -19,7 +19,6 @@ router.post('/eventos', (req, res) => {
   db.query(sqlDispositivo, [id_dispositivo], (err, rows) => {
     if (err) return res.status(500).json({ message: '❌ Error al buscar dispositivo', error: err })
 
-    // Dispositivo no encontrado
     if (rows.length === 0) {
       return res.status(404).json({ message: `⚠️ El dispositivo con ID ${id_dispositivo} no está registrado.` })
     }
@@ -44,28 +43,43 @@ router.post('/eventos', (req, res) => {
 
       const { descripcion, tipo_evento, nivel_critico } = rowsCodigo[0]
 
-      // Insertar el evento
+      // Insertar evento en la base de datos
       const sqlInsertar = `
         INSERT INTO eventos (id_dispositivo, codigo_contact_id, descripcion, tipo_evento, nivel_critico)
         VALUES (?, ?, ?, ?, ?)
       `
       db.query(sqlInsertar, [id_dispositivo, codigo, descripcion, tipo_evento, nivel_critico], (err, result) => {
-        if (err) return res.status(500).json({ message: '❌ Error al registrar evento', error: err })
+        if (err) return res.status(500).json({ message: 'Error al registrar evento', error: err })
 
-        // Emitir evento en tiempo real
-        const nuevoEvento = {
-          id: result.insertId,
-          id_dispositivo,
-          codigo_contact_id: codigo,
-          descripcion,
-          tipo_evento,
-          nivel_critico,
-          fecha_hora: new Date()
-        }
+        // ✅ Actualizar estado y última señal
+        const sqlActualizarEstado = `
+          UPDATE dispositivos 
+          SET estado = 'conectado', ultima_senal = NOW()
+          WHERE id_dispositivo = ?
+        `
+        db.query(sqlActualizarEstado, [id_dispositivo], (err2) => {
+          if (err2) {
+            console.error('❌ Error al actualizar estado del dispositivo:', err2)
+          } else {
+            console.log(`📡 Dispositivo ${id_dispositivo} marcado como CONECTADO`)
+            console.log(`📥 Evento recibido: Código ${codigo} (${descripcion}), tipo ${tipo_evento}, nivel ${nivel_critico}`)
+          }
 
-        req.app.get('io').emit('nuevoEvento', nuevoEvento)
+          // ⚡ Emitir evento a los clientes
+          const nuevoEvento = {
+            id: result.insertId,
+            id_dispositivo,
+            codigo_contact_id: codigo,
+            descripcion,
+            tipo_evento,
+            nivel_critico,
+            fecha_hora: new Date()
+          }
 
-        res.status(201).json({ message: '✅ Evento registrado correctamente', id_evento: result.insertId })
+          req.app.get('io').emit('nuevoEvento', nuevoEvento)
+
+          res.status(201).json({ message: '✅ Evento registrado correctamente', id_evento: result.insertId })
+        })
       })
     })
   })

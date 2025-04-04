@@ -10,6 +10,7 @@ const deviceRoutes = require('./routes/device')
 const clienteRoutes = require('./routes/client')
 const eventRoutes = require('./routes/event')
 const dashboardRoutes = require('./routes/dashboard')
+const verificarDispositivosConectados = require('./utils/cronConexiones')
 
 
 
@@ -27,6 +28,12 @@ const io = new Server(server, {
 app.set('io',io)
 
 const PORT = process.env.PORT || 4000
+
+// Ejecutar cada minuto
+setInterval(() => {
+  console.log('⏱️ Ejecutando verificación de conexión...')
+  verificarDispositivosConectados()
+}, 60 * 1000) // cada 60 segundos
 
 // Middlewares
 app.use(cors())
