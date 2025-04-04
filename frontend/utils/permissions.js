@@ -18,7 +18,7 @@ const permisosPorRol = {
     'editar_cliente',
     'cambiar_password'
   ],
-  Admin: [
+  admin: [
     // Dashboard
     'ver_dashboard',
   
