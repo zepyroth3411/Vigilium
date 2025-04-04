@@ -1,5 +1,6 @@
 import WelcomeCard from '@/components/dashboard/WelcomeCard'
 import QuickActionsTechnical from '@/components/dashboard/QuickActionsTechnical'
+import SystemStatus from '@/components/dashboard/SystemStatus'
 import { useEffect,useState } from 'react'
 import { useRouter } from 'next/router'
 
@@ -30,6 +31,7 @@ export default function DashboardTecnico() {
     <div className="p-6 space-y-8 max-w-6xl mx-auto">
 
       <WelcomeCard />
+      <SystemStatus/>
       <QuickActionsTechnical />
       <div className="bg-white shadow rounded-xl p-6 border">
         <h2 className="text-xl font-semibold text-gray-800 mb-2">🔧 Panel Técnico</h2>

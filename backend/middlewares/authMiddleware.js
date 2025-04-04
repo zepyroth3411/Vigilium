@@ -1,22 +1,21 @@
-// middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken')
 
 function verificarToken(req, res, next) {
-  const authHeader = req.headers.authorization
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
 
-  if (!authHeader) {
+  if (!token) {
     return res.status(401).json({ message: 'Token no proporcionado' })
   }
 
-  const token = authHeader.split(' ')[1] // Formato: "Bearer TOKEN"
+  jwt.verify(token, process.env.JWT_SECRET || 'vigilium_secret_2025', (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: 'Token inválido o expirado' })
+    }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'vigilium_secret_2025')
-    req.usuario = decoded // Guardamos el usuario decodificado en la request
+    req.user = user // 👈🏼 AQUÍ es donde se debe asignar el usuario decodificado
     next()
-  } catch (error) {
-    return res.status(403).json({ message: 'Token inválido' })
-  }
+  })
 }
 
 module.exports = verificarToken

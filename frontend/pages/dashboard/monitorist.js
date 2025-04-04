@@ -30,7 +30,7 @@ export default function DashboardMonitorista() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8 max-w-6xl mx-auto">
       <WelcomeCard userRole="monitorista" />
       <SystemStatus />
       <section>

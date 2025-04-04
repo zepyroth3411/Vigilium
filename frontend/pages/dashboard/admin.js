@@ -7,7 +7,7 @@ import RecentEvents from '@/components/dashboard/RecentEvents'
 
 export default function DashboardAdmin() {
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+    <div className="p-6 space-y-8 max-w-6xl mx-auto">
       <WelcomeCard />
       <SystemStatus />
       <SummaryCards />

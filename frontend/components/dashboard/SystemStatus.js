@@ -1,31 +1,52 @@
 import { useEffect, useState } from 'react'
 
 export default function SystemStatus() {
-  const [stats, setStats] = useState({
-    usuarios: 0,
-    dispositivos: 0,
-    eventos: 0
-  })
+  const [stats, setStats] = useState(null)
 
   useEffect(() => {
-    // 🔄 Aquí podrías hacer llamadas reales a tu backend cuando tengas los endpoints
     const obtenerEstadisticas = async () => {
-      // Datos simulados
-      setStats({
-        usuarios: 6,
-        dispositivos: 12,
-        eventos: 37
-      })
+      try {
+        const token = localStorage.getItem('vigilium_token')
+        const res = await fetch('http://localhost:4000/api/dashboard', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = await res.json()
+        setStats(data)
+      } catch (error) {
+        console.error('❌ Error al obtener estadísticas:', error)
+      }
     }
 
     obtenerEstadisticas()
   }, [])
 
+  if (!stats) return null
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <StatusCard title="Usuarios" value={stats.usuarios} icon="👥" />
-      <StatusCard title="Dispositivos" value={stats.dispositivos} icon="💻" />
-      <StatusCard title="Eventos" value={stats.eventos} icon="📋" />
+      {stats.rol === 'admin' && (
+        <>
+          <StatusCard title="Usuarios" value={stats.total_usuarios} icon="👥" />
+          <StatusCard title="Dispositivos" value={stats.total_dispositivos} icon="💻" />
+          <StatusCard title="Eventos" value={stats.total_eventos} icon="📋" />
+        </>
+      )}
+
+      {stats.rol === 'tecnico' && (
+        <>
+          <StatusCard title="Clientes" value={stats.total_clientes} icon="🏢" />
+          <StatusCard title="Dispositivos" value={stats.total_dispositivos} icon="💻" />
+        </>
+      )}
+
+      {stats.rol === 'monitorista' && (
+        <>
+          <StatusCard title="Eventos totales" value={stats.total_eventos} icon="📋" />
+          <StatusCard title="Alertas críticas" value={stats.alertas_criticas} icon="🚨" />
+        </>
+      )}
     </div>
   )
 }

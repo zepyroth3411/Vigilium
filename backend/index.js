@@ -9,6 +9,7 @@ const passwordRoutes = require('./routes/password')
 const deviceRoutes = require('./routes/device')
 const clienteRoutes = require('./routes/client')
 const eventRoutes = require('./routes/event')
+const dashboardRoutes = require('./routes/dashboard')
 
 
 
@@ -38,6 +39,7 @@ app.use('/api', passwordRoutes)
 app.use('/api', deviceRoutes)
 app.use('/api', clienteRoutes)
 app.use('/api', eventRoutes)
+app.use('/api', dashboardRoutes)
 
 // Socket.IO
 io.on('connection', (socket) => {
