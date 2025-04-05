@@ -11,6 +11,8 @@ const clienteRoutes = require('./routes/client')
 const eventRoutes = require('./routes/event')
 const dashboardRoutes = require('./routes/dashboard')
 const verificarDispositivosConectados = require('./utils/cronConexiones')
+const bitacoraRoutes = require('./routes/logbook')
+
 
 
 
@@ -47,6 +49,7 @@ app.use('/api', deviceRoutes)
 app.use('/api', clienteRoutes)
 app.use('/api', eventRoutes)
 app.use('/api', dashboardRoutes)
+app.use('/api/logbook', bitacoraRoutes)
 
 // Socket.IO
 io.on('connection', (socket) => {
