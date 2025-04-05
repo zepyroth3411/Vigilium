@@ -16,7 +16,7 @@ export default function QuickActionsTecnico() {
         </button>
 
         <button
-          onClick={() => router.push('/tools/reportar')}
+          onClick={() => router.push('/tool/report')}
           className="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-4 rounded transition-all"
         >
           🚧 Reportar falla
