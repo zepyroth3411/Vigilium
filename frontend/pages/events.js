@@ -4,9 +4,9 @@ import { tienePermiso } from '@/utils/permissions'
 import socket from '@/utils/socket'
 import AccessDenied from '@/components/common/AccessDenied'
 
-
 export default function Eventos() {
   const [mostrarModal, setMostrarModal] = useState(false)
+  const [mostrarHistorial, setMostrarHistorial] = useState(false)
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null)
   const [respuestaMonitorista, setRespuestaMonitorista] = useState('')
   const [nombreUsuario, setNombreUsuario] = useState('Monitorista')
@@ -14,31 +14,10 @@ export default function Eventos() {
   const [eventos, setEventos] = useState([])
   const [historialCritico, setHistorialCritico] = useState([])
   const [rolUsuario, setRolUsuario] = useState('')
-  const [filtro, setFiltro] = useState({
-    tipo: '',
-    dispositivo: '',
-    fechaInicio: '',
-    fechaFin: ''
-  })
+  const [filtro, setFiltro] = useState({ tipo: '', dispositivo: '', fechaInicio: '', fechaFin: '' })
 
   const logRef = useRef(null)
 
-  const eventosSimulados = [
-    'Batería baja',
-    'Zona abierta',
-    'Señal restablecida',
-    'Fallo de comunicación',
-    'Reconexión de dispositivo',
-    'Alarma de pánico',
-    'Evento de prueba',
-    'FUEGO',
-    'MÉDICA',
-    'ROBO',
-  ]
-
-  const dispositivosSimulados = ['TL280-001', 'TL280-002', 'TL280-003', 'TL280-004']
-
-  // Recuperar usuario y rol
   useEffect(() => {
     const nombre = localStorage.getItem('vigilium_user')
     const id = localStorage.getItem('vigilium_user_id')
@@ -51,7 +30,6 @@ export default function Eventos() {
     }
   }, [])
 
-  // Simulación de eventos
   useEffect(() => {
     socket.on('nuevoEvento', (evento) => {
       const esCritico = evento.nivel_critico === 'crítico'
@@ -70,9 +48,7 @@ export default function Eventos() {
 
       if (esCritico) {
         const audio = new Audio('/criticalalert.mp3')
-        audio.play().catch(err => {
-          console.warn('⚠️ No se pudo reproducir sonido:', err)
-        })
+        audio.play().catch(err => console.warn('⚠️ No se pudo reproducir sonido:', err))
       }
     })
 
@@ -81,8 +57,6 @@ export default function Eventos() {
     }
   }, [])
 
-
-  // Scroll inteligente
   useEffect(() => {
     const log = logRef.current
     if (!log) return
@@ -90,11 +64,31 @@ export default function Eventos() {
     if (isAtBottom) log.scrollTop = log.scrollHeight
   }, [eventos])
 
-  // Sockets
+  const cargarEventosRecientes = async () => {
+    try {
+      const res = await fetch('http://localhost:4000/api/eventos/recientes')
+      const data = await res.json()
+      const recientes = data.map(evento => ({
+        id: evento.id_evento,
+        tipo: 'ALERTA CRÍTICA',
+        descripcion: evento.descripcion,
+        hora: new Date(evento.fecha_atencion).toLocaleTimeString(),
+        dispositivo: evento.id_dispositivo,
+        atendidoPor: evento.atendido_por,
+        atendidoPorId: evento.atendido_por || '—',
+        descripcionAtencion: evento.detalle_atencion
+      }))
+      setHistorialCritico(recientes)
+    } catch (err) {
+      console.error('❌ Error al cargar historial reciente:', err)
+    }
+  }
+
   useEffect(() => {
-    socket.on('eventoAtendido', (evento) => {
-      setEventos(prev => prev.filter(e => e.id !== evento.id))
-      setHistorialCritico(prev => [evento, ...prev])
+    socket.on('eventoAtendido', () => {
+      cargarEventosRecientes()
+      const audio = new Audio('/resolved.mp3')
+      audio.play().catch(() => {})
     })
 
     socket.on('actualizarDescripcion', (eventoActualizado) => {
@@ -109,33 +103,55 @@ export default function Eventos() {
     }
   }, [])
 
-  const marcarComoAtendido = (id, detalle) => {
-    const evento = eventos.find(e => e.id === id)
-    if (evento) {
-      const eventoConUsuario = {
-        ...evento,
-        atendidoPor: nombreUsuario,
-        atendidoPorId: idUsuario,
-        descripcionAtencion: detalle,
+  useEffect(() => {
+    const cargarEventosActivos = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/eventos/activos')
+        const data = await res.json()
+
+        const activos = data.map(evento => ({
+          id: evento.id_evento,
+          tipo: evento.nivel_critico === 'crítico' ? 'ALERTA CRÍTICA' : 'NOTIFICACIÓN',
+          descripcion: evento.descripcion,
+          hora: new Date(evento.fecha_hora).toLocaleTimeString(),
+          dispositivo: evento.id_dispositivo,
+          atendido: false
+        }))
+
+        setEventos(activos)
+      } catch (err) {
+        console.error('❌ Error al cargar eventos activos:', err)
       }
-      setHistorialCritico(prev => [eventoConUsuario, ...prev])
+    }
+
+    cargarEventosActivos()
+    cargarEventosRecientes()
+  }, [])
+
+  const marcarComoAtendido = async (id, detalle) => {
+    try {
+      await fetch(`http://localhost:4000/api/eventos/${id}/atender`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ atendido_por: nombreUsuario, detalle_atencion: detalle })
+      })
       setEventos(prev => prev.filter(e => e.id !== id))
-      socket.emit('marcarAtendido', eventoConUsuario)
+    } catch (err) {
+      console.error('❌ Error al marcar evento como atendido:', err)
     }
   }
 
   const eventosFiltrados = eventos.filter(e => {
     const coincideTipo = !filtro.tipo || e.tipo === filtro.tipo
     const coincideDispositivo = !filtro.dispositivo || e.dispositivo === filtro.dispositivo
-    const eventoFecha = new Date(e.fecha)
-    const desde = filtro.fechaInicio ? new Date(filtro.fechaInicio) : null
-    const hasta = filtro.fechaFin ? new Date(filtro.fechaFin) : null
-    const dentroDeRango =
-      (!desde || eventoFecha >= desde) &&
-      (!hasta || eventoFecha <= hasta)
-    return coincideTipo && coincideDispositivo && dentroDeRango
+    return coincideTipo && coincideDispositivo
   })
 
+  const resumenUsuarios = historialCritico.reduce((acc, evento) => {
+    if (!evento.atendidoPor) return acc
+    acc[evento.atendidoPor] = (acc[evento.atendidoPor] || 0) + 1
+    return acc
+  }, {})
 
   if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
     return <AccessDenied />
@@ -146,19 +162,14 @@ export default function Eventos() {
       <h1 className="text-3xl font-bold text-primary">Eventos</h1>
       <p className="text-gray-600 mt-1 mb-4">Registro de eventos en tiempo real</p>
 
-      <EventsFilter filtro={filtro} setFiltro={setFiltro} dispositivos={dispositivosSimulados} />
+      <EventsFilter filtro={filtro} setFiltro={setFiltro} dispositivos={[]} />
 
-      {/* Eventos activos */}
       <div ref={logRef} className="bg-white h-[400px] overflow-y-auto rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm">
         {eventosFiltrados.map(evento => (
           <div key={evento.id} className="bg-gray-50 p-3 rounded-md shadow-sm border border-gray-100">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">{evento.hora}</span>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full
-                ${evento.tipo === 'ALERTA CRÍTICA'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-blue-100 text-blue-800'
-                }`}>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${evento.tipo === 'ALERTA CRÍTICA' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
                 {evento.tipo}
               </span>
             </div>
@@ -180,7 +191,6 @@ export default function Eventos() {
         ))}
       </div>
 
-      {/* Modal de atención */}
       {mostrarModal && eventoSeleccionado && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-md border">
@@ -217,17 +227,39 @@ export default function Eventos() {
         </div>
       )}
 
-      {/* Historial */}
       {historialCritico.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">📜 Historial de Alertas Críticas</h2>
-          <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3 shadow-sm">
+        <div className="mt-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+          <p className="font-semibold text-gray-700">🧾 Ultimos {historialCritico.length} eventos críticos atendidos</p>
+          <p className="text-sm text-gray-500 mt-1 mb-2">
+            👥 Atendidos por:
+            {Object.entries(resumenUsuarios).map(([usuario, cantidad]) => (
+              <span key={usuario} className="ml-2 text-primary font-semibold">
+                {usuario} ({cantidad})
+              </span>
+            ))}
+          </p>
+          <button
+            onClick={() => setMostrarHistorial(true)}
+            className="mt-2 bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 text-sm"
+          >
+            Ver historial completo
+          </button>
+        </div>
+      )}
+
+      {mostrarHistorial && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex justify-center items-center">
+          <div className="bg-white rounded-xl p-6 shadow-xl w-full max-w-2xl h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">📋 Historial de eventos atendidos</h2>
+            <button onClick={() => setMostrarHistorial(false)} className="text-sm text-gray-500 hover:underline mb-3">
+              Cerrar
+            </button>
             {historialCritico.map(evento => (
-              <div key={evento.id} className="border border-gray-100 p-3 rounded bg-gray-50 text-sm">
+              <div key={evento.id} className="border border-gray-100 p-3 rounded bg-gray-50 text-sm mb-2">
                 <div className="flex justify-between">
                   <span className="text-gray-500">{evento.hora}</span>
                   <span className="text-xs font-semibold text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
-                    Atendido por: {evento.atendidoPor || '—'} ({evento.atendidoPorId || '—'})
+                    Atendido por: {evento.atendidoPor || '—'}
                   </span>
                 </div>
                 <div className="mt-1 text-gray-800">
@@ -237,26 +269,6 @@ export default function Eventos() {
                   <div className="mt-1 text-sm text-gray-600 italic">
                     📝 {evento.descripcionAtencion}
                   </div>
-                )}
-                {evento.atendidoPorId === idUsuario && tienePermiso(rolUsuario, 'editar_descripcion_evento') && (
-                  <button
-                    onClick={() => {
-                      const nuevaDescripcion = prompt("Editar cómo se atendió:", evento.descripcionAtencion || '')
-                      if (nuevaDescripcion) {
-                        const actualizado = {
-                          ...evento,
-                          descripcionAtencion: nuevaDescripcion
-                        }
-                        setHistorialCritico(prev =>
-                          prev.map(e => e.id === evento.id ? actualizado : e)
-                        )
-                        socket.emit('actualizarDescripcion', actualizado)
-                      }
-                    }}
-                    className="mt-2 text-xs text-blue-600 hover:underline"
-                  >
-                    ✏️ Editar descripción
-                  </button>
                 )}
               </div>
             ))}

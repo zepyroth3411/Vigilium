@@ -85,4 +85,68 @@ router.post('/eventos', (req, res) => {
   })
 })
 
+// GET /api/eventos/activos
+router.get('/eventos/activos', (req, res) => {
+  const sql = `
+    SELECT * FROM eventos 
+    WHERE atendido = FALSE 
+    ORDER BY fecha_hora DESC
+  `
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener eventos activos:', err)
+      return res.status(500).json({ message: 'Error al obtener eventos activos' })
+    }
+    res.json(rows)
+  })
+})
+
+// GET /api/eventos/recientes
+router.get('/eventos/recientes', (req, res) => {
+  const sql = `
+    SELECT * FROM eventos 
+    WHERE atendido = TRUE 
+    ORDER BY fecha_atencion DESC 
+    LIMIT 5
+  `
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener eventos recientes:', err)
+      return res.status(500).json({ message: 'Error al obtener eventos recientes' })
+    }
+    res.json(rows)
+  })
+})
+
+// PUT /api/eventos/:id/atender
+router.put('/eventos/:id/atender', (req, res) => {
+  const { id } = req.params
+  const { atendido_por, detalle_atencion } = req.body
+
+  if (!atendido_por || !detalle_atencion) {
+    return res.status(400).json({ message: 'Faltan datos: atendido_por o detalle_atencion' })
+  }
+
+  const sql = `
+    UPDATE eventos 
+    SET atendido = TRUE, 
+        atendido_por = ?, 
+        detalle_atencion = ?, 
+        fecha_atencion = NOW() 
+    WHERE id_evento = ?
+  `
+
+  db.query(sql, [atendido_por, detalle_atencion, id], (err) => {
+    if (err) {
+      console.error('❌ Error al marcar evento como atendido:', err)
+      return res.status(500).json({ message: 'Error al actualizar evento' })
+    }
+
+    req.app.get('io').emit('eventoAtendido', { id_evento: id })
+    res.json({ message: '✅ Evento marcado como atendido' })
+  })
+})
+
+
+
 module.exports = router
