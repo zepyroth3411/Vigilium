@@ -1,7 +1,6 @@
 import WelcomeCard from '@/components/dashboard/WelcomeCard'
 import RoleOverview from '@/components/dashboard/RoleOverview'
 import QuickActions from '@/components/dashboard/QuickActions'
-import RecentEvents from '@/components/dashboard/RecentEvents'
 
 
 export default function DashboardAdmin() {
@@ -10,7 +9,6 @@ export default function DashboardAdmin() {
       <WelcomeCard />
       <RoleOverview />
       <QuickActions />
-      <RecentEvents />
     </div>
   )
 }

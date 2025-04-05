@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import LiveFaultsCard from './LiveFaultCards'
+import RecentEvents from './RecentEvents' // <- nuevo import
 
 export default function RoleOverview() {
   const [dashboardData, setDashboardData] = useState(null)
@@ -56,22 +57,29 @@ export default function RoleOverview() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {resumen.map((item, idx) => (
-        <div
-          key={idx}
-          className="bg-white border rounded-xl shadow-sm p-5 flex flex-col gap-1"
-        >
-          <div className="text-3xl">{item.icono}</div>
-          <p className="text-sm text-gray-500">{item.titulo}</p>
-          <p className="text-lg font-semibold text-primary">{item.valor}</p>
-        </div>
-      ))}
-      {(rol === 'admin' || rol === 'tecnico') && (
-        <div className="col-span-1">
-          <LiveFaultsCard />
-        </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {resumen.map((item, idx) => (
+          <div
+            key={idx}
+            className="bg-white border rounded-xl shadow-sm p-5 flex flex-col gap-1"
+          >
+            <div className="text-3xl">{item.icono}</div>
+            <p className="text-sm text-gray-500">{item.titulo}</p>
+            <p className="text-lg font-semibold text-primary">{item.valor}</p>
+          </div>
+        ))}
+        {(rol === 'admin' || rol === 'tecnico') && (
+          <div className="col-span-1">
+            <LiveFaultsCard />
+          </div>
+        )}
+      </div>
+
+      {/* Eventos recientes para admin y monitorista */}
+      {(rol === 'admin' || rol === 'monitorista') && (
+        <RecentEvents />
       )}
-    </div>
+    </>
   )
 }

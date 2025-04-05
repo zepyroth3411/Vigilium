@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { tienePermiso } from '@/utils/permissions'
 import WelcomeCard from '@/components/dashboard/WelcomeCard'
 import AccessDenied from '@/components/common/AccessDenied'
-import RecentEvents from '@/components/dashboard/RecentEvents'
 import RoleOverview from '@/components/dashboard/RoleOverview'
 
 export default function DashboardMonitorista() {
@@ -33,10 +32,6 @@ export default function DashboardMonitorista() {
     <div className="p-6 space-y-8 max-w-6xl mx-auto">
       <WelcomeCard />
       <RoleOverview />
-      <section>
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">📌 Eventos Recientes</h2>
-        <RecentEvents />
-      </section>
     </div>
   )
 }

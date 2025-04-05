@@ -147,6 +147,27 @@ router.put('/eventos/:id/atender', (req, res) => {
   })
 })
 
+// GET /api/eventos/recientes-dashboard
+router.get('/eventos/recientes-dashboard', (req, res) => {
+  const sql = `
+    SELECT id_evento, id_dispositivo, tipo_evento, fecha_atencion 
+    FROM eventos 
+    WHERE atendido = TRUE 
+    ORDER BY fecha_atencion DESC 
+    LIMIT 5
+  `
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener eventos recientes para dashboard:', err)
+      return res.status(500).json({ message: 'Error al obtener eventos recientes' })
+    }
+
+    // Formatear fecha y hora en frontend, aquí solo pasamos los datos
+    res.json(rows)
+  })
+})
+
 
 
 module.exports = router
