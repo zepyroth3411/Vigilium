@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import LiveFaultsCard from './LiveFaultCards'
 
 export default function RoleOverview() {
   const [dashboardData, setDashboardData] = useState(null)
@@ -66,6 +67,11 @@ export default function RoleOverview() {
           <p className="text-lg font-semibold text-primary">{item.valor}</p>
         </div>
       ))}
+      {(rol === 'admin' || rol === 'tecnico') && (
+        <div className="col-span-1">
+          <LiveFaultsCard />
+        </div>
+      )}
     </div>
   )
 }
