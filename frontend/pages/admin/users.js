@@ -22,7 +22,7 @@ export default function UserManagement() {
       router.push('/dashboard')
       return
     }
-  
+
     try {
       const decoded = JSON.parse(atob(token.split('.')[1])) // decodifica el payload del JWT
       if (decoded.rol !== 'admin') {
@@ -34,22 +34,22 @@ export default function UserManagement() {
       router.push('/login')
       return
     }
-  
+
     const fetchUsuarios = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/usuarios', {
           headers: { Authorization: `Bearer ${token}` }
         })
-  
+
         if (!res.ok) throw new Error('No autorizado')
-  
+
         const data = await res.json()
         setUsuarios(data)
       } catch (err) {
         setError(err.message)
       }
     }
-  
+
     const fetchRoles = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/roles')
@@ -59,7 +59,7 @@ export default function UserManagement() {
         console.error('Error al obtener roles:', err)
       }
     }
-  
+
     fetchUsuarios()
     fetchRoles()
   }, [])
@@ -98,6 +98,7 @@ export default function UserManagement() {
       setSuccess(null)
     }
   }
+
   const handleGuardarCambios = async (idUsuario, index) => {
     const token = localStorage.getItem('vigilium_token')
 
@@ -141,6 +142,34 @@ export default function UserManagement() {
       setSuccess(null)
     }
   }
+  const handleEliminarUsuario = async (idUsuario) => {
+    const token = localStorage.getItem('vigilium_token')
+
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/usuarios/${idUsuario}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.message || 'Error al eliminar usuario')
+
+      setUsuarios(prev => prev.filter(user => user.id_usuario !== idUsuario))
+      setSuccess('🗑️ Usuario eliminado correctamente')
+      setError(null)
+    } catch (err) {
+      setError(err.message)
+      setSuccess(null)
+    }
+  }
+
+
+
 
 
 
@@ -227,18 +256,26 @@ export default function UserManagement() {
                         </button>
                       </>
                     ) : (
-                      <button
-                        onClick={() => {
-                          setEditIndex(index)
-                          setEditNombre(usuario.nombre)
-                          setEditPassword('')
-                          const rol = rolesDisponibles.find(r => r.nombre === usuario.rol)
-                          setEditRolId(rol?.id || '')
-                        }}
-                        className="text-blue-600 text-sm hover:underline"
-                      >
-                        Editar
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditIndex(index)
+                            setEditNombre(usuario.nombre)
+                            setEditPassword('')
+                            const rol = rolesDisponibles.find(r => r.nombre === usuario.rol)
+                            setEditRolId(rol?.id || '')
+                          }}
+                          className="text-blue-600 text-sm hover:underline"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleEliminarUsuario(usuario.id_usuario)}
+                          className="text-red-600 text-sm hover:underline ml-3"
+                        >
+                          Eliminar
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
