@@ -51,7 +51,6 @@ export default function RoleOverview() {
       { titulo: 'Alertas críticas', valor: dashboardData.alertas_criticas ?? '—', icono: '🚨' },
       { titulo: 'Eventos totales', valor: dashboardData.total_eventos ?? '—', icono: '📋' },
       { titulo: 'Último evento atendido', valor: dashboardData.ultimo_evento_atendido ?? '—', icono: '👁' },
-      { titulo: 'Tiempo promedio de atención', valor: dashboardData.promedio_atencion ?? '—', icono: '⏱' },
       { titulo: 'Eventos activos', valor: dashboardData.eventos_activos ?? '—', icono: '🔴' }
     ]
   }

@@ -62,7 +62,19 @@ router.get('/dashboard', verifyToken, (req, res) => {
     const sql = `
       SELECT
         (SELECT COUNT(*) FROM eventos WHERE nivel_critico = 'crítico') AS alertas_criticas,
-        (SELECT COUNT(*) FROM eventos) AS total_eventos
+        (SELECT COUNT(*) FROM eventos) AS total_eventos,
+        (SELECT COUNT(*) FROM eventos WHERE nivel_critico = 'crítico' AND atendido = FALSE) AS eventos_activos,
+        (
+          SELECT CONCAT(
+            'Dispositivo ', id_dispositivo, 
+            ' - Atendido por ', IFNULL(atendido_por, 'N/D'), 
+            ' a las ', DATE_FORMAT(fecha_atencion, '%H:%i:%s')
+          )
+          FROM eventos 
+          WHERE atendido = TRUE 
+          ORDER BY fecha_atencion DESC 
+          LIMIT 1
+        ) AS ultimo_evento_atendido
     `
     db.query(sql, (err, results) => {
       if (err) {
@@ -72,6 +84,7 @@ router.get('/dashboard', verifyToken, (req, res) => {
       console.log('✅ Dashboard monitorista listo:', results[0])
       res.json({ rol: 'monitorista', ...results[0] })
     })
+
   } else {
     console.warn(`⚠️ Rol no autorizado: ${rol}`)
     return res.status(403).json({ message: 'Rol no autorizado para dashboard' })
