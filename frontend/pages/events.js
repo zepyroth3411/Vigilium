@@ -3,6 +3,12 @@ import EventsFilter from '@/components/events/EventsFilter'
 import { tienePermiso } from '@/utils/permissions'
 import socket from '@/utils/socket'
 import AccessDenied from '@/components/common/AccessDenied'
+import {
+  API_URL,
+  USER_ID_KEY,
+  USER_NAME_KEY,
+  TOKEN_KEY
+} from '@/utils/config'
 
 export default function Eventos() {
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -19,9 +25,9 @@ export default function Eventos() {
   const logRef = useRef(null)
 
   useEffect(() => {
-    const nombre = localStorage.getItem('vigilium_user')
-    const id = localStorage.getItem('vigilium_user_id')
-    const token = localStorage.getItem('vigilium_token')
+    const nombre = localStorage.getItem(USER_NAME_KEY)
+    const id = localStorage.getItem(USER_ID_KEY)
+    const token = localStorage.getItem(TOKEN_KEY)
     if (nombre) setNombreUsuario(nombre)
     if (id) setIdUsuario(id)
     if (token) {
@@ -66,7 +72,7 @@ export default function Eventos() {
 
   const cargarEventosRecientes = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/eventos/recientes')
+      const res = await fetch(`${API_URL}/api/eventos/recientes`)
       const data = await res.json()
       const recientes = data.map(evento => ({
         id: evento.id_evento,
@@ -106,7 +112,7 @@ export default function Eventos() {
   useEffect(() => {
     const cargarEventosActivos = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/eventos/activos')
+        const res = await fetch(`${API_URL}/api/eventos/activos`)
         const data = await res.json()
 
         const activos = data.map(evento => ({
@@ -130,7 +136,7 @@ export default function Eventos() {
 
   const marcarComoAtendido = async (id, detalle) => {
     try {
-      await fetch(`http://localhost:4000/api/eventos/${id}/atender`, {
+      await fetch(`${API_URL}/api/eventos/${id}/atender`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ atendido_por: nombreUsuario, detalle_atencion: detalle })
@@ -156,7 +162,6 @@ export default function Eventos() {
   if (rolUsuario && !tienePermiso(rolUsuario, 'ver_eventos')) {
     return <AccessDenied />
   }
-
   return (
     <div className="p-6 bg-[#f9fafb] min-h-screen">
       <h1 className="text-3xl font-bold text-primary">Eventos</h1>

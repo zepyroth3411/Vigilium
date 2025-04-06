@@ -4,6 +4,7 @@ import { tienePermiso } from '@/utils/permissions'
 import AccessDenied from '@/components/common/AccessDenied'
 import DiagnosticModal from '@/components/devices/DiagnosticModal'
 import DeviceFormModal from '@/components/devices/DeviceFormModal'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function Dispositivos() {
   const [rolUsuario, setRolUsuario] = useState('')
@@ -19,7 +20,7 @@ export default function Dispositivos() {
 
   // Obtener token y rol
   useEffect(() => {
-    const token = localStorage.getItem('vigilium_token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split('.')[1]))
@@ -37,15 +38,15 @@ export default function Dispositivos() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resDispositivos = await fetch('http://localhost:4000/api/devices', {
+        const resDispositivos = await fetch(`${API_URL}/api/devices`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('vigilium_token')}`
+            'Authorization': `Bearer ${localStorage.getItem(TOKEN_KEY)}`
           }
         })
         const dispositivosData = await resDispositivos.json()
         setDispositivos(Array.isArray(dispositivosData) ? dispositivosData : [])
 
-        const resClientes = await fetch('http://localhost:4000/api/clientes')
+        const resClientes = await fetch(`${API_URL}/api/clientes`)
         const clientesData = await resClientes.json()
         setClientes(Array.isArray(clientesData) ? clientesData : [])
       } catch (err) {
@@ -70,8 +71,8 @@ export default function Dispositivos() {
     if (!confirmar) return
 
     try {
-      const token = localStorage.getItem('vigilium_token')
-      const res = await fetch(`http://localhost:4000/api/devices/${id_dispositivo}`, {
+      const token = localStorage.getItem(TOKEN_KEY)
+      const res = await fetch(`${API_URL}/api/devices/${id_dispositivo}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -89,10 +90,10 @@ export default function Dispositivos() {
   }
 
   const handleToggleRecepcion = async (id, nuevoEstado) => {
-    const token = localStorage.getItem('vigilium_token')
+    const token = localStorage.getItem(TOKEN_KEY)
 
     try {
-      const res = await fetch(`http://localhost:4000/api/devices/${id}/estado`, {
+      const res = await fetch(`${API_URL}/api/devices/${id}/estado`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +105,6 @@ export default function Dispositivos() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
 
-      // Actualiza el dispositivo localmente
       setDispositivos(prev =>
         prev.map(d =>
           d.id_dispositivo === id ? { ...d, recibir_eventos: nuevoEstado } : d
@@ -116,13 +116,11 @@ export default function Dispositivos() {
     }
   }
 
-
   return (
-
     <div className="p-6 bg-white min-h-screen">
       <h1 className="text-3xl font-bold text-primary">Dispositivos</h1>
       <p className="text-gray-600 mt-1">Monitoreo de comunicadores TL280 asignados a clientes</p>
-      {/* Filtros + botón */}
+
       <div className="mt-6 mb-4 flex flex-wrap justify-between items-center">
         <div className="space-x-2">
           {['todos', 'conectado', 'desconectado', 'alerta'].map(est => (
@@ -153,7 +151,6 @@ export default function Dispositivos() {
         )}
       </div>
 
-      {/* Tabla */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border">
         <table className="w-full text-sm">
           <thead className="bg-gray-100 text-gray-700">
@@ -162,7 +159,7 @@ export default function Dispositivos() {
               <th className="p-3 text-left">Cliente</th>
               <th className="p-3 text-left">Estado</th>
               <th className="p-3 text-left">Última señal</th>
-              <th className="p-3 text-left">Recibe eventos</th> {/* NUEVA COLUMNA */}
+              <th className="p-3 text-left">Recibe eventos</th>
               <th className="p-3 text-left">Acciones</th>
             </tr>
           </thead>
@@ -189,7 +186,6 @@ export default function Dispositivos() {
                   </td>
                   <td className="p-3">
                     <div className="flex flex-wrap gap-2 items-center">
-                      {/* 🔍 Ver detalles */}
                       <button
                         onClick={() => {
                           setDispositivoSeleccionado(d)
@@ -202,7 +198,6 @@ export default function Dispositivos() {
 
                       {tienePermiso(rolUsuario, 'editar_dispositivo') && (
                         <>
-                          {/* ✏️ Editar */}
                           <button
                             onClick={() => {
                               setModoEdicion(d)
@@ -213,7 +208,6 @@ export default function Dispositivos() {
                             ✏️ Editar
                           </button>
 
-                          {/* 🗑 Eliminar */}
                           <button
                             onClick={() => handleEliminarDispositivo(d.id_dispositivo)}
                             className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full hover:bg-red-200 transition h-8"
@@ -221,7 +215,6 @@ export default function Dispositivos() {
                             🗑 Eliminar
                           </button>
 
-                          {/* ✅ Toggle */}
                           <div className="relative inline-block w-11 h-6 ml-1">
                             <input
                               type="checkbox"
@@ -253,7 +246,6 @@ export default function Dispositivos() {
         </table>
       </div>
 
-      {/* Modal Diagnóstico */}
       {mostrarDiagnostico && dispositivoSeleccionado && (
         <DiagnosticModal
           dispositivo={dispositivoSeleccionado}
@@ -261,7 +253,6 @@ export default function Dispositivos() {
         />
       )}
 
-      {/* Modal Crear/Editar */}
       {mostrarFormulario && (
         <DeviceFormModal
           modo={modoEdicion ? 'editar' : 'crear'}
@@ -272,8 +263,8 @@ export default function Dispositivos() {
             setModoEdicion(null)
           }}
           onSuccess={async () => {
-            const token = localStorage.getItem('vigilium_token')
-            const res = await fetch('http://localhost:4000/api/devices', {
+            const token = localStorage.getItem(TOKEN_KEY)
+            const res = await fetch(`${API_URL}/api/devices`, {
               headers: {
                 'Authorization': `Bearer ${token}`
               }

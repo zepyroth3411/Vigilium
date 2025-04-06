@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function AdminPanel() {
   const [usuarios, setUsuarios] = useState([])
@@ -9,14 +10,15 @@ export default function AdminPanel() {
   const router = useRouter()
 
   useEffect(() => {
-    const tkn = localStorage.getItem('vigilium_token')
+    const tkn = localStorage.getItem(TOKEN_KEY)
     if (!tkn) {
       router.push('/login')
       return
     }
+
     setToken(tkn)
 
-    fetch('http://localhost:4000/api/usuarios', {
+    fetch(`${API_URL}/api/usuarios`, {
       headers: { Authorization: `Bearer ${tkn}` }
     })
       .then(res => {
@@ -72,7 +74,6 @@ export default function AdminPanel() {
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            // Aquí se integrará la lógica de cambio de contraseña
             alert('Funcionalidad próximamente 🛠')
           }}
           className="grid grid-cols-1 md:grid-cols-2 gap-4"

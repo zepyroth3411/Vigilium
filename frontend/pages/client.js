@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import AccessDenied from '@/components/common/AccessDenied'
 import { tienePermiso } from '@/utils/permissions'
 import ClientFormModal from '@/components/clients/ClientFormModal'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function Clientes() {
   const [rolUsuario, setRolUsuario] = useState('')
@@ -13,7 +14,7 @@ export default function Clientes() {
 
   // Obtener rol desde token
   useEffect(() => {
-    const token = localStorage.getItem('vigilium_token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split('.')[1]))
@@ -29,7 +30,7 @@ export default function Clientes() {
 
   // Cargar clientes
   useEffect(() => {
-    fetch('http://localhost:4000/api/clientes')
+    fetch(`${API_URL}/api/clientes`)
       .then(res => res.json())
       .then(data => setClientes(data))
       .catch(err => console.error('Error al cargar clientes:', err))
@@ -42,8 +43,8 @@ export default function Clientes() {
   const eliminarCliente = async (id_cliente) => {
     if (!confirm('¿Seguro que deseas eliminar este cliente?')) return
     try {
-      const res = await fetch(`http://localhost:4000/api/clientes/${id_cliente}`, {
-        method: 'DELETE',
+      const res = await fetch(`${API_URL}/api/clientes/${id_cliente}`, {
+        method: 'DELETE'
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
@@ -128,7 +129,7 @@ export default function Clientes() {
             setModoEdicion(null)
           }}
           onSuccess={async () => {
-            const res = await fetch('http://localhost:4000/api/clientes')
+            const res = await fetch(`${API_URL}/api/clientes`)
             const data = await res.json()
             setClientes(data)
           }}

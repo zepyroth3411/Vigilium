@@ -1,9 +1,9 @@
-import '../styles/globals.css'
-import Navbar from '../components/Navbar'
+import '@/styles/globals.css'
+import Navbar from '@/components/Navbar'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { isAuthenticated } from '../utils/auth'
+import { isAuthenticated } from '@/utils/auth'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter()
