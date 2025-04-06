@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react'
 import { jwtDecode } from 'jwt-decode'
+import { TOKEN_KEY } from '@/utils/config'
 
 export default function WelcomeCard() {
   const [nombre, setNombre] = useState('')
   const [rol, setRol] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('vigilium_token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (token) {
       try {
         const decoded = jwtDecode(token)
-        setNombre(decoded.nombre)
-        setRol(decoded.rol)
+        setNombre(decoded.nombre || '')
+        setRol(decoded.rol || '')
       } catch (err) {
-        console.error('Error al decodificar el token:', err)
+        console.error('❌ Error al decodificar el token en WelcomeCard:', err)
       }
     }
   }, [])
@@ -21,7 +22,9 @@ export default function WelcomeCard() {
   return (
     <div className="bg-white border shadow-sm rounded-xl p-6">
       <h2 className="text-2xl font-semibold text-primary">👋 ¡Bienvenido, {nombre}!</h2>
-      <p className="text-gray-600 mt-1 text-sm">Rol: <span className="capitalize font-medium">{rol}</span></p>
+      <p className="text-gray-600 mt-1 text-sm">
+        Rol: <span className="capitalize font-medium">{rol}</span>
+      </p>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { API_URL } from '@/utils/config'
 
 export default function RecentEvents() {
   const [eventos, setEventos] = useState([])
@@ -6,7 +7,7 @@ export default function RecentEvents() {
   useEffect(() => {
     const fetchRecientes = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/eventos/recientes-dashboard')
+        const res = await fetch(`${API_URL}/api/eventos/recientes-dashboard`)
         const data = await res.json()
 
         const eventosFormateados = data.map(e => ({

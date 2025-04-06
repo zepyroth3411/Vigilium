@@ -1,5 +1,7 @@
+// components/ClientFormModal.js
 import { useState, useEffect } from 'react'
 import Dialog from '@/components/common/Dialog'
+import { API_URL } from '@/utils/config'
 
 export default function ClientFormModal({ modo, cliente, onClose, onSuccess }) {
   const [form, setForm] = useState({
@@ -23,26 +25,22 @@ export default function ClientFormModal({ modo, cliente, onClose, onSuccess }) {
   const handleChange = (e) => {
     setForm(prev => ({
       ...prev,
-      [e.target.name]: e.target.value.trimStart() // evitar espacios iniciales
+      [e.target.name]: e.target.value.trimStart()
     }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // 🔎 Verificación con logs
-    console.log('[🧪 Formulario]', form)
-
     const { nombre, direccion, telefono, correo } = form
-
     if (!nombre || !direccion || !telefono || !correo) {
       alert('Todos los campos son obligatorios.')
       return
     }
 
     const url = modo === 'crear'
-      ? 'http://localhost:4000/api/clientes'
-      : `http://localhost:4000/api/clientes/${cliente.id_cliente}`
+      ? `${API_URL}/api/clientes`
+      : `${API_URL}/api/clientes/${cliente.id_cliente}`
 
     const method = modo === 'crear' ? 'POST' : 'PUT'
 

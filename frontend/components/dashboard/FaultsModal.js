@@ -1,17 +1,17 @@
-// components/FaultsModal.js
 import { useState } from 'react'
+import { API_URL, USER_NAME_KEY } from '@/utils/config'
 
 export default function FaultsModal({ fallas, setFallas, onClose }) {
   const [fallaSeleccionada, setFallaSeleccionada] = useState(null)
   const [solucion, setSolucion] = useState('')
 
-  const nombreTecnico = localStorage.getItem('vigilium_user')
+  const nombreTecnico = typeof window !== 'undefined' ? localStorage.getItem(USER_NAME_KEY) : ''
 
   const confirmarAtencion = async () => {
     if (!solucion.trim()) return alert('Por favor escribe una solución.')
-  
+
     try {
-      const res = await fetch(`http://localhost:4000/api/fault-reporting/${fallaSeleccionada.id}/atender`, {
+      const res = await fetch(`${API_URL}/api/fault-reporting/${fallaSeleccionada.id}/atender`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -19,12 +19,11 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
           solucion
         })
       })
-  
+
       if (res.ok) {
-        // ✅ Reproducir sonido de éxito
         const audio = new Audio('/notification.mp3')
         audio.play()
-  
+
         setFallas(prev => prev.filter(f => f.id !== fallaSeleccionada.id))
         setFallaSeleccionada(null)
         setSolucion('')
@@ -33,9 +32,9 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
       }
     } catch (err) {
       console.error('❌ Error al actualizar falla:', err)
+      alert('Ocurrió un error al intentar marcar la falla como atendida.')
     }
   }
-  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-start justify-center p-6">
@@ -43,10 +42,11 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
         <h2 className="text-xl font-bold text-red-700">🚨 Fallas Técnicas Activas</h2>
         <button className="absolute top-4 right-6 text-xl text-gray-600 hover:text-black" onClick={onClose}>✖</button>
 
-        {/* Si está resolviendo una falla */}
         {fallaSeleccionada ? (
           <div className="space-y-4">
-            <p className="font-semibold text-gray-700">🔧 Estás atendiendo la falla del dispositivo <span className="text-blue-600">{fallaSeleccionada.id_dispositivo}</span></p>
+            <p className="font-semibold text-gray-700">
+              🔧 Estás atendiendo la falla del dispositivo <span className="text-blue-600">{fallaSeleccionada.id_dispositivo}</span>
+            </p>
 
             <textarea
               value={solucion}

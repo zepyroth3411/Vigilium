@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import LiveFaultsCard from './LiveFaultCards'
-import RecentEvents from './RecentEvents' // <- nuevo import
+import RecentEvents from './RecentEvents'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function RoleOverview() {
   const [dashboardData, setDashboardData] = useState(null)
@@ -8,8 +9,8 @@ export default function RoleOverview() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const token = localStorage.getItem('vigilium_token')
-        const res = await fetch('http://localhost:4000/api/dashboard', {
+        const token = localStorage.getItem(TOKEN_KEY)
+        const res = await fetch(`${API_URL}/api/dashboard`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -17,7 +18,7 @@ export default function RoleOverview() {
         const data = await res.json()
         setDashboardData(data)
       } catch (error) {
-        console.error('Error cargando dashboard:', error)
+        console.error('❌ Error cargando dashboard:', error)
       }
     }
 
@@ -75,7 +76,6 @@ export default function RoleOverview() {
         )}
       </div>
 
-      {/* Eventos recientes para admin y monitorista */}
       {(rol === 'admin' || rol === 'monitorista') && (
         <RecentEvents />
       )}

@@ -1,7 +1,7 @@
-// components/LiveFaultsCard.js
 import { useEffect, useState } from 'react'
 import socket from '@/utils/socket'
 import FaultsModal from './FaultsModal'
+import { API_URL } from '@/utils/config'
 
 export default function LiveFaultsCard() {
   const [fallas, setFallas] = useState([])
@@ -10,7 +10,7 @@ export default function LiveFaultsCard() {
   useEffect(() => {
     const fetchFallas = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/fault-reporting')
+        const res = await fetch(`${API_URL}/api/fault-reporting`)
         const data = await res.json()
         setFallas(data)
       } catch (err) {
@@ -22,17 +22,20 @@ export default function LiveFaultsCard() {
   }, [])
 
   useEffect(() => {
-    socket.on('nueva-falla', (nuevaFalla) => {
+    const handleNuevaFalla = (nuevaFalla) => {
       setFallas((prev) => [...prev, nuevaFalla])
-    })
+    }
 
-    socket.on('falla-atendida', ({ id }) => {
+    const handleFallaAtendida = ({ id }) => {
       setFallas((prev) => prev.filter(f => f.id !== id))
-    })
+    }
+
+    socket.on('nueva-falla', handleNuevaFalla)
+    socket.on('falla-atendida', handleFallaAtendida)
 
     return () => {
-      socket.off('nueva-falla')
-      socket.off('falla-atendida')
+      socket.off('nueva-falla', handleNuevaFalla)
+      socket.off('falla-atendida', handleFallaAtendida)
     }
   }, [])
 

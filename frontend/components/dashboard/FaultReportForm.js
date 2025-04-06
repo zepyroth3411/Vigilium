@@ -1,4 +1,6 @@
+// components/FaultReportForm.js
 import { useState } from 'react'
+import { API_URL } from '@/utils/config'
 
 export default function FaultReportForm({ dispositivos, tecnico }) {
   const [form, setForm] = useState({
@@ -19,21 +21,31 @@ export default function FaultReportForm({ dispositivos, tecnico }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const res = await fetch('http://localhost:4000/api/fault-reporting', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        tecnico
-      })
-    })
+    if (!form.id_dispositivo || !form.tipo_falla || !form.descripcion) {
+      alert('❗ Por favor completa todos los campos obligatorios.')
+      return
+    }
 
-    const data = await res.json()
-    if (res.ok) {
-      alert('✅ Falla registrada correctamente')
-      setForm({ id_dispositivo: '', tipo_falla: '', descripcion: '', urgente: false })
-    } else {
-      alert(`❌ Error: ${data.error}`)
+    try {
+      const res = await fetch(`${API_URL}/api/fault-reporting`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          tecnico
+        })
+      })
+
+      const data = await res.json()
+      if (res.ok) {
+        alert('✅ Falla registrada correctamente')
+        setForm({ id_dispositivo: '', tipo_falla: '', descripcion: '', urgente: false })
+      } else {
+        alert(`❌ Error: ${data.error || 'No se pudo registrar la falla'}`)
+      }
+    } catch (error) {
+      alert('❌ Error al enviar el reporte')
+      console.error('Error al reportar falla:', error)
     }
   }
 
