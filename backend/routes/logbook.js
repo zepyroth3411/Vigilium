@@ -4,7 +4,7 @@ const db = require('../db')
 
 // GET /api/logbook/clientes
 router.get('/clientes', (req, res) => {
-  db.query('SELECT id_cliente, nombre FROM clientes', (err, rows) => {
+  db.query('SELECT id_cliente, nombre, direccion, telefono, correo FROM clientes', (err, rows) => {
     if (err) {
       console.error('❌ Error al obtener clientes:', err)
       return res.status(500).json({ error: 'Error al obtener clientes' })

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { jwtDecode } from 'jwt-decode'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 import Toast from '@/components/Toast'
 
 export default function ReportarFalla() {
@@ -23,13 +24,17 @@ export default function ReportarFalla() {
   }, [])
 
   const fetchDispositivos = async () => {
-    const res = await fetch('http://localhost:4000/api/logbook/dispositivos')
-    const data = await res.json()
-    setDispositivos(data)
+    try {
+      const res = await fetch(`${API_URL}/api/logbook/dispositivos`)
+      const data = await res.json()
+      setDispositivos(data)
+    } catch (err) {
+      console.error('❌ Error al cargar dispositivos:', err)
+    }
   }
 
   const obtenerTecnicoActual = () => {
-    const token = localStorage.getItem('vigilium_token')
+    const token = localStorage.getItem(TOKEN_KEY)
     if (!token) return null
     try {
       const decoded = jwtDecode(token)
@@ -42,14 +47,14 @@ export default function ReportarFalla() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setForm({
-      ...form,
+    setForm(prev => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value
-    })
+    }))
   }
 
   const playSound = () => {
-    const audio = new Audio('/notification.mp3') // Asegúrate de tener este archivo
+    const audio = new Audio('/notification.mp3')
     audio.play()
   }
 
@@ -60,7 +65,7 @@ export default function ReportarFalla() {
     }
 
     try {
-      const res = await fetch('http://localhost:4000/api/fault-reporting', {
+      const res = await fetch(`${API_URL}/api/fault-reporting`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, tecnico })
@@ -88,31 +93,60 @@ export default function ReportarFalla() {
       <div className="bg-white shadow rounded-xl p-6 space-y-4">
         <div>
           <label className="font-semibold">Dispositivo:</label>
-          <select name="id_dispositivo" value={form.id_dispositivo} onChange={handleChange} className="w-full border p-2 rounded">
+          <select
+            name="id_dispositivo"
+            value={form.id_dispositivo}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
             <option value="">Selecciona un dispositivo</option>
             {dispositivos.map((d) => (
-              <option key={d.id_dispositivo} value={d.id_dispositivo}>{d.nombre_dispositivo}</option>
+              <option key={d.id_dispositivo} value={d.id_dispositivo}>
+                {d.nombre_dispositivo}
+              </option>
             ))}
           </select>
         </div>
 
         <div>
           <label className="font-semibold">Tipo de falla:</label>
-          <input type="text" name="tipo_falla" value={form.tipo_falla} onChange={handleChange} className="w-full border p-2 rounded" placeholder="Ej. Corte de energía" />
+          <input
+            type="text"
+            name="tipo_falla"
+            value={form.tipo_falla}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            placeholder="Ej. Corte de energía"
+          />
         </div>
 
         <div>
           <label className="font-semibold">Descripción detallada:</label>
-          <textarea name="descripcion" value={form.descripcion} onChange={handleChange} className="w-full border p-2 rounded" rows={4}></textarea>
+          <textarea
+            name="descripcion"
+            value={form.descripcion}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            rows={4}
+          />
         </div>
 
         <label className="inline-flex items-center">
-          <input type="checkbox" name="urgente" checked={form.urgente} onChange={handleChange} className="mr-2" />
+          <input
+            type="checkbox"
+            name="urgente"
+            checked={form.urgente}
+            onChange={handleChange}
+            className="mr-2"
+          />
           Marcar como urgente
         </label>
 
         <div className="flex justify-end">
-          <button onClick={enviarReporte} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+          <button
+            onClick={enviarReporte}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
             🚨 Enviar Reporte
           </button>
         </div>

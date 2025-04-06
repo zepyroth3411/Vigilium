@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { API_URL } from '@/utils/config'
 
 export default function BitacoraServicio() {
   const [clientes, setClientes] = useState([])
@@ -32,22 +33,20 @@ export default function BitacoraServicio() {
   }, [])
 
   const fetchClientes = async () => {
-    const res = await fetch('http://localhost:4000/api/logbook/clientes')
+    const res = await fetch(`${API_URL}/api/logbook/clientes`)
     const data = await res.json()
-    console.log('Clientes recibidos:', data)
     setClientes(data)
   }
 
   const fetchDispositivos = async () => {
-    const res = await fetch('http://localhost:4000/api/logbook/dispositivos')
+    const res = await fetch(`${API_URL}/api/logbook/dispositivos`)
     const data = await res.json()
     setDispositivos(data)
   }
 
   const fetchTecnicos = async () => {
-    const res = await fetch('http://localhost:4000/api/logbook/tecnicos')
+    const res = await fetch(`${API_URL}/api/logbook/tecnicos`)
     const data = await res.json()
-    console.log('Técnicos recibidos:', data)
     setTecnicos(data)
   }
 
@@ -61,7 +60,7 @@ export default function BitacoraServicio() {
 
   const crearCliente = async () => {
     if (form.nombreCliente && form.direccion && form.telefono && form.correo) {
-      const res = await fetch('http://localhost:4000/api/logbook/clientes', {
+      const res = await fetch(`${API_URL}/api/logbook/clientes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,7 +80,7 @@ export default function BitacoraServicio() {
 
   const crearDispositivo = async () => {
     if (form.idDispositivo && form.nombreDispositivo && form.clienteAsignado) {
-      const res = await fetch('http://localhost:4000/api/logbook/dispositivos', {
+      const res = await fetch(`${API_URL}/api/logbook/dispositivos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,15 +112,17 @@ export default function BitacoraServicio() {
       doc.text('"Tecnología que protege lo que más importa"', 50, 26)
       doc.text(`Fecha: ${fechaActual}`, 150, 10)
 
+      const clienteSeleccionado = clientes.find(c => c.id_cliente == form.cliente)
+
       autoTable(doc, {
         startY: 40,
         head: [['Cliente', 'Correo', 'Dispositivo', 'Dirección', 'Teléfono']],
         body: [[
-          form.nombreCliente || clientes.find(c => c.id_cliente == form.cliente)?.nombre,
-          form.correo,
+          form.nombreCliente || clienteSeleccionado?.nombre || '—',
+          form.correo || clienteSeleccionado?.correo || '—',
           form.nombreDispositivo || form.dispositivo,
-          form.direccion,
-          form.telefono
+          form.direccion || clienteSeleccionado?.direccion || '—',
+          form.telefono || clienteSeleccionado?.telefono || '—'
         ]]
       })
 
@@ -143,7 +144,7 @@ export default function BitacoraServicio() {
 
       doc.save('orden_servicio_vigilium.pdf')
 
-      await fetch('http://localhost:4000/api/logbook/bitacora', {
+      await fetch(`${API_URL}/api/logbook/bitacora`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -157,7 +158,6 @@ export default function BitacoraServicio() {
       })
     }
   }
-
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">📝 Bitácora de Servicio</h1>
