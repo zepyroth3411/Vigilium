@@ -1,26 +1,25 @@
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { TOKEN_KEY } from '@/utils/config'
 import WelcomeCard from '@/components/dashboard/WelcomeCard'
 import QuickActionsTechnical from '@/components/dashboard/QuickActionsTechnical'
 import RoleOverview from '@/components/dashboard/RoleOverview'
-import { useEffect,useState } from 'react'
-import { useRouter } from 'next/router'
 
 export default function DashboardTecnico() {
   const router = useRouter()
-  const [estado, setEstado] = useState(false)
+  const [rolUsuario, setRolUsuario] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('vigilium_token')
-    if (!token) {
-      router.push('/login')
-      return
-    }
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (!token) return router.push('/login')
 
     try {
       const decoded = JSON.parse(atob(token.split('.')[1]))
       if (decoded.rol !== 'tecnico') {
-        router.push('/login') // redirige si no es técnico
+        router.push('/login')
         return
       }
+      setRolUsuario(decoded.rol)
     } catch (error) {
       console.error('Token inválido', error)
       router.push('/login')
@@ -32,13 +31,6 @@ export default function DashboardTecnico() {
       <WelcomeCard />
       <RoleOverview />
       <QuickActionsTechnical />
-      <div className="bg-white shadow rounded-xl p-6 border">
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">🔧 Panel Técnico</h2>
-        <p className="text-gray-600 text-sm">
-          Aquí podrás ver el estado de los dispositivos, clientes asignados y tareas de mantenimiento.
-        </p>
-        <p className="text-gray-500 mt-2 text-sm">⚙️ Próximamente se integrarán herramientas para pruebas en campo y diagnóstico remoto.</p>
-      </div>
     </div>
   )
 }

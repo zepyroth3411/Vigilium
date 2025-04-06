@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import AccessDenied from '@/components/common/AccessDenied'
 import { tienePermiso } from '@/utils/permissions'
+import { API_URL, TOKEN_KEY, USER_ID_KEY } from '@/utils/config'
 
 export default function CambiarPassword() {
   const [passwordActual, setPasswordActual] = useState('')
@@ -11,12 +12,16 @@ export default function CambiarPassword() {
   const [rol, setRol] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('vigilium_token')
-    const id = localStorage.getItem('vigilium_user_id')
+    const token = localStorage.getItem(TOKEN_KEY)
+    const id = localStorage.getItem(USER_ID_KEY)
     if (token && id) {
-      const decoded = JSON.parse(atob(token.split('.')[1]))
-      setRol(decoded.rol)
-      setIdUsuario(id)
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]))
+        setRol(decoded.rol)
+        setIdUsuario(id)
+      } catch (err) {
+        console.error('Token inválido', err)
+      }
     }
   }, [])
 
@@ -26,35 +31,35 @@ export default function CambiarPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-  
+
     if (!passwordActual || !nuevaPassword || !confirmarPassword) {
       setMensaje({ tipo: 'error', texto: 'Todos los campos son obligatorios.' })
       return
     }
-  
+
     if (nuevaPassword !== confirmarPassword) {
       setMensaje({ tipo: 'error', texto: 'Las contraseñas no coinciden.' })
       return
     }
-  
+
     try {
-      const token = localStorage.getItem('vigilium_token')
-  
-      const res = await fetch('http://localhost:4000/api/password', {
+      const token = localStorage.getItem(TOKEN_KEY)
+
+      const res = await fetch(`${API_URL}/api/password`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           id_usuario: idUsuario,
-          nuevaPassword: nuevaPassword 
+          nuevaPassword
         })
       })
-  
+
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
-  
+
       setMensaje({ tipo: 'success', texto: 'Contraseña actualizada correctamente.' })
       setPasswordActual('')
       setNuevaPassword('')

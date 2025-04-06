@@ -79,14 +79,14 @@ export default function Navbar() {
                       >
                         👥 Usuarios
                       </Link>
-                      <Link
+                      {/* <Link
                         href="/admin/roles"
                         className={`block px-4 py-2 text-sm hover:bg-orange-50 ${router.pathname === '/admin/roles' ? 'font-semibold text-primary' : ''
                           }`}
                         onClick={() => setAdminMenuOpen(false)}
                       >
                         🔐 Roles
-                      </Link>
+                      </Link> */}
                     </>
                   )}
                   <Link
