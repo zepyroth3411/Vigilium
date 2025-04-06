@@ -3,16 +3,18 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { logout } from '@/utils/auth'
 import { jwtDecode } from 'jwt-decode'
+import { TOKEN_KEY } from '@/utils/config'
 
 export default function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [userRole, setUserRole] = useState(null)
   const [adminMenuOpen, setAdminMenuOpen] = useState(false)
+  const [userRole, setUserRole] = useState(null)
+
   const toggleAdminMenu = () => setAdminMenuOpen(!adminMenuOpen)
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('vigilium_token') : null
+    const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null
     if (token) {
       try {
         const decoded = jwtDecode(token)
@@ -23,7 +25,6 @@ export default function Navbar() {
     }
   }, [])
 
-  // Links visibles por rol
   const visibleLinks = [
     { href: '/dashboard/admin', label: 'Dashboard', roles: ['admin'] },
     { href: '/dashboard/monitorist', label: 'Dashboard', roles: ['monitorista'] },
@@ -33,11 +34,20 @@ export default function Navbar() {
     { href: '/client', label: 'Clientes', roles: ['admin', 'monitorista', 'tecnico'] },
   ]
 
+  const adminLinks = [
+    ...(userRole === 'admin' ? [
+      { href: '/admin/users', label: '👥 Usuarios' },
+      // { href: '/admin/roles', label: '🔐 Roles' },
+    ] : []),
+    { href: '/admin/password', label: '🔑 Cambiar contraseña' },
+  ]
+
   return (
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary tracking-tight">Vigilium</h1>
 
+        {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center text-sm font-medium text-gray-700">
           {visibleLinks
             .filter(link => link.roles.includes(userRole))
@@ -48,60 +58,41 @@ export default function Navbar() {
                 className={`px-3 py-1 rounded-md transition-all duration-300 ${router.pathname === link.href
                   ? 'bg-orange-100 text-primary font-semibold'
                   : 'hover:bg-orange-50 hover:text-primary'
-                  }`}
+                }`}
               >
                 {link.label}
               </Link>
             ))}
 
-          {/* Administración según rol */}
           {(userRole === 'admin' || userRole === 'monitorista' || userRole === 'tecnico') && (
             <div className="relative">
               <button
                 onClick={toggleAdminMenu}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-300 focus:outline-none ${router.pathname.startsWith('/admin')
-                    ? 'bg-orange-100 text-primary font-semibold'
-                    : 'hover:bg-orange-50 hover:text-primary'
-                  }`}
+                  ? 'bg-orange-100 text-primary font-semibold'
+                  : 'hover:bg-orange-50 hover:text-primary'
+                }`}
               >
                 Administración
               </button>
 
               {adminMenuOpen && (
                 <div className="absolute left-0 mt-2 w-48 bg-white border rounded-md shadow-md z-50">
-                  {userRole === 'admin' && (
-                    <>
-                      <Link
-                        href="/admin/users"
-                        className={`block px-4 py-2 text-sm hover:bg-orange-50 ${router.pathname === '/admin/users' ? 'font-semibold text-primary' : ''
-                          }`}
-                        onClick={() => setAdminMenuOpen(false)}
-                      >
-                        👥 Usuarios
-                      </Link>
-                      {/* <Link
-                        href="/admin/roles"
-                        className={`block px-4 py-2 text-sm hover:bg-orange-50 ${router.pathname === '/admin/roles' ? 'font-semibold text-primary' : ''
-                          }`}
-                        onClick={() => setAdminMenuOpen(false)}
-                      >
-                        🔐 Roles
-                      </Link> */}
-                    </>
-                  )}
-                  <Link
-                    href="/admin/password"
-                    className={`block px-4 py-2 text-sm hover:bg-orange-50 ${router.pathname === '/admin/password' ? 'font-semibold text-primary' : ''
-                      }`}
-                    onClick={() => setAdminMenuOpen(false)}
-                  >
-                    🔑 Cambiar contraseña
-                  </Link>
+                  {adminLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`block px-4 py-2 text-sm hover:bg-orange-50 ${router.pathname === item.href ? 'font-semibold text-primary' : ''}`}
+                      onClick={() => setAdminMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
           )}
-          {/* Cerrar Sesion */}
+
           <button
             onClick={logout}
             className="px-3 py-1 rounded-md text-sm text-red-600 hover:bg-red-50 transition-all duration-300"
@@ -110,7 +101,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Hamburguesa móvil */}
+        {/* Mobile Menu Icon */}
         <button
           className="md:hidden text-gray-700 text-2xl"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -119,7 +110,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Menú móvil */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <ul className="md:hidden px-6 pb-4 space-y-2 text-sm font-medium text-gray-700">
           {visibleLinks
@@ -131,7 +122,7 @@ export default function Navbar() {
                   className={`block px-3 py-2 rounded-md transition-all duration-300 ${router.pathname === link.href
                     ? 'bg-orange-100 text-primary font-semibold'
                     : 'hover:bg-orange-50 hover:text-primary'
-                    }`}
+                  }`}
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
@@ -139,17 +130,17 @@ export default function Navbar() {
               </li>
             ))}
 
-          {(userRole === 'admin' || userRole === 'monitorista' || userRole === 'tecnico') && (
-            <>
-              {userRole === 'admin' && (
-                <>
-                  <li><Link href="/admin/users" className="block px-3 py-2">👥 Usuarios</Link></li>
-                  <li><Link href="/admin/roles" className="block px-3 py-2">🔐 Roles</Link></li>
-                </>
-              )}
-              <li><Link href="/admin/password" className="block px-3 py-2">🔑 Cambiar contraseña</Link></li>
-            </>
-          )}
+          {adminLinks.map(item => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="block px-3 py-2"
+                onClick={() => setMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
 
           <li>
             <button

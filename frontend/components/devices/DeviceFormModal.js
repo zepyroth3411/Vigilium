@@ -1,4 +1,6 @@
+// components/modals/DeviceFormModal.js
 import { useState, useEffect } from 'react'
+import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function DeviceFormModal({ onClose, onSuccess, clientes = [], dispositivo = null, modo }) {
   const [formData, setFormData] = useState({
@@ -15,26 +17,26 @@ export default function DeviceFormModal({ onClose, onSuccess, clientes = [], dis
         id_cliente: dispositivo.id_cliente || ''
       })
     }
-  }, [dispositivo, modo])
+  }, [modo, dispositivo])
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.id_dispositivo || !formData.nombre_dispositivo || !formData.id_cliente) {
+    const { id_dispositivo, nombre_dispositivo, id_cliente } = formData
+    if (!id_dispositivo || !nombre_dispositivo || !id_cliente) {
       alert('Todos los campos son obligatorios')
       return
     }
 
-    const token = localStorage.getItem('vigilium_token')
-
+    const token = localStorage.getItem(TOKEN_KEY)
     const url = modo === 'editar'
-      ? `http://localhost:4000/api/devices/${formData.id_dispositivo}`
-      : 'http://localhost:4000/api/devices'
+      ? `${API_URL}/api/devices/${id_dispositivo}`
+      : `${API_URL}/api/devices`
 
     const method = modo === 'editar' ? 'PUT' : 'POST'
 
@@ -49,11 +51,12 @@ export default function DeviceFormModal({ onClose, onSuccess, clientes = [], dis
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message)
+      if (!res.ok) throw new Error(data.message || 'Error inesperado')
 
       onSuccess()
       onClose()
     } catch (err) {
+      console.error('❌ Error al guardar dispositivo:', err)
       alert('Error al guardar el dispositivo: ' + err.message)
     }
   }
@@ -67,6 +70,7 @@ export default function DeviceFormModal({ onClose, onSuccess, clientes = [], dis
         >
           ×
         </button>
+
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           {modo === 'crear' ? '➕ Nuevo Dispositivo' : '✏️ Editar Dispositivo'}
         </h2>
