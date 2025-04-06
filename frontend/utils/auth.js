@@ -1,23 +1,36 @@
 // utils/auth.js
+import { jwtDecode } from 'jwt-decode'
+import { TOKEN_KEY, USER_NAME_KEY, USER_ID_KEY } from './config'
 
-// Obtener el token del localStorage
 export const getToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('vigilium_token')
-    }
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(TOKEN_KEY)
+  }
+  return null
+}
+
+export const isAuthenticated = () => !!getToken()
+
+export const getUserData = () => {
+  try {
+    const token = getToken()
+    if (!token) return null
+    return jwtDecode(token)
+  } catch (err) {
+    console.error('❌ Token inválido', err)
     return null
   }
-  
-  // Verificar si el usuario está autenticado
-  export const isAuthenticated = () => {
-    return !!getToken()
+}
+
+export const getUserRole = () => getUserData()?.rol || null
+export const getUserName = () => getUserData()?.nombre || localStorage.getItem(USER_NAME_KEY) || null
+export const getUserId = () => getUserData()?.id || localStorage.getItem(USER_ID_KEY) || null
+
+export const logout = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_NAME_KEY)
+    localStorage.removeItem(USER_ID_KEY)
+    window.location.href = '/login'
   }
-  
-  // Cerrar sesión
-  export const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('vigilium_token')
-      window.location.href = '/login'
-    }
-  }
-  
+}

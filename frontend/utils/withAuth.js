@@ -1,12 +1,14 @@
+// utils/withAuth.js
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { TOKEN_KEY } from './config'
 
 const withAuth = (WrappedComponent) => {
   return function ProtectedComponent(props) {
     const router = useRouter()
 
     useEffect(() => {
-      const token = localStorage.getItem('vigilium_token')
+      const token = localStorage.getItem(TOKEN_KEY)
 
       if (!token) {
         console.warn('🚫 No hay token, redirigiendo al login')
@@ -16,18 +18,17 @@ const withAuth = (WrappedComponent) => {
 
       try {
         const payloadBase64 = token.split('.')[1]
-        const decodedPayload = JSON.parse(atob(payloadBase64))
-
+        const decoded = JSON.parse(atob(payloadBase64))
         const now = Math.floor(Date.now() / 1000)
-        if (decodedPayload.exp < now) {
+
+        if (decoded.exp && decoded.exp < now) {
           console.warn('⏳ Token expirado, redirigiendo al login')
-          localStorage.removeItem('vigilium_token')
+          localStorage.removeItem(TOKEN_KEY)
           router.push('/login')
-          return
         }
       } catch (error) {
-        console.error('❌ Token inválido o mal formado:', error)
-        localStorage.removeItem('vigilium_token')
+        console.error('❌ Token inválido:', error)
+        localStorage.removeItem(TOKEN_KEY)
         router.push('/login')
       }
     }, [])

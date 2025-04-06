@@ -2,6 +2,11 @@
 
 import { DASHBOARD_ROUTES } from './config'
 
+/**
+ * Redirige automáticamente al usuario según su rol.
+ * @param {string} token - JWT del usuario
+ * @param {object} router - Objeto router de Next.js
+ */
 export function redirectByRole(token, router) {
   if (!token) {
     router.push('/login')
