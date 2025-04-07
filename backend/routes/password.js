@@ -15,18 +15,19 @@ router.patch('/password', verifyToken, async (req, res) => {
   try {
     const hash = await bcrypt.hash(nuevaPassword, 10)
 
-    const [result] = await db.promise().query(
+    db.query(
       'UPDATE usuarios SET password = ? WHERE id_usuario = ?',
-      [hash, id_usuario]
+      [hash, id_usuario],
+      (err, result) => {
+        if (err) return res.status(500).json({ message: 'Error al actualizar contraseña' })
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Usuario no encontrado' })
+        }
+
+        return res.json({ message: 'Contraseña actualizada correctamente' })
+      }
     )
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado' })
-    }
-
-    return res.json({ message: 'Contraseña actualizada correctamente' })
   } catch (error) {
-    console.error('❌ Error al actualizar contraseña:', error)
     res.status(500).json({ message: 'Error interno del servidor' })
   }
 })

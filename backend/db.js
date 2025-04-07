@@ -1,23 +1,18 @@
 const mysql = require('mysql2')
-require('dotenv').config()
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'root',
-  database: process.env.DB_NAME || 'vigilium',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',      // cambia esto
+  password: 'root', // cambia esto
+  database: 'vigilium'  // o el nombre que le hayas puesto
 })
 
-pool.getConnection((err, connection) => {
+connection.connect(err => {
   if (err) {
-    console.error('❌ Error al conectar con MySQL:', err)
-  } else {
-    console.log('✅ Pool de MySQL conectado exitosamente')
-    connection.release()
+    console.error('Error de conexión a MySQL:', err)
+    return
   }
+  console.log('✅ Conexión MySQL exitosa')
 })
 
-module.exports = pool
+module.exports = connection

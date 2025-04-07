@@ -1,7 +1,7 @@
 // backend/utils/cronConexiones.js
 const db = require('../db')
 
-async function verificarDispositivosConectados() {
+function verificarDispositivosConectados() {
   const sql = `
     UPDATE dispositivos d
     LEFT JOIN (
@@ -14,12 +14,13 @@ async function verificarDispositivosConectados() {
       OR e.ultima_fecha IS NULL
   `
 
-  try {
-    const [result] = await db.promise().query(sql)
-    console.log(`🔄 Dispositivos actualizados: ${result.affectedRows}`)
-  } catch (err) {
-    console.error('❌ Error actualizando estado de conexión:', err)
-  }
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('❌ Error actualizando estado de conexión:', err)
+    } else {
+      console.log(`🔄 Dispositivos actualizados: ${result.affectedRows}`)
+    }
+  })
 }
 
 module.exports = verificarDispositivosConectados

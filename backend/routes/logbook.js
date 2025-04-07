@@ -3,82 +3,67 @@ const router = express.Router()
 const db = require('../db')
 
 // GET /api/logbook/clientes
-router.get('/clientes', async (req, res) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT id_cliente, nombre, direccion, telefono, correo FROM clientes'
-    )
+router.get('/clientes', (req, res) => {
+  db.query('SELECT id_cliente, nombre FROM clientes', (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener clientes:', err)
+      return res.status(500).json({ error: 'Error al obtener clientes' })
+    }
     res.json(rows)
-  } catch (err) {
-    console.error('❌ Error al obtener clientes:', err)
-    res.status(500).json({ error: 'Error al obtener clientes' })
-  }
+  })
 })
 
 // GET /api/logbook/dispositivos
-router.get('/dispositivos', async (req, res) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT id_dispositivo, nombre_dispositivo FROM dispositivos'
-    )
+router.get('/dispositivos', (req, res) => {
+  db.query('SELECT id_dispositivo, nombre_dispositivo FROM dispositivos', (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener dispositivos:', err)
+      return res.status(500).json({ error: 'Error al obtener dispositivos' })
+    }
     res.json(rows)
-  } catch (err) {
-    console.error('❌ Error al obtener dispositivos:', err)
-    res.status(500).json({ error: 'Error al obtener dispositivos' })
-  }
+  })
 })
 
 // POST /api/logbook/clientes
-router.post('/clientes', async (req, res) => {
+router.post('/clientes', (req, res) => {
   const { nombre, direccion, telefono, correo } = req.body
 
   if (!nombre || !correo) {
     return res.status(400).json({ error: 'Nombre y correo son obligatorios' })
   }
 
-  try {
-    const [result] = await db.promise().query(
-      'INSERT INTO clientes (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)',
-      [nombre, direccion, telefono, correo]
-    )
+  const sql = 'INSERT INTO clientes (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)'
+  db.query(sql, [nombre, direccion, telefono, correo], (err, result) => {
+    if (err) {
+      console.error('❌ Error al crear cliente:', err)
+      return res.status(500).json({ error: 'Error al crear cliente' })
+    }
 
-    res.status(201).json({
-      message: 'Cliente creado',
-      id_cliente: result.insertId,
-      nombre
-    })
-  } catch (err) {
-    console.error('❌ Error al crear cliente:', err)
-    res.status(500).json({ error: 'Error al crear cliente' })
-  }
+    res.status(201).json({ message: 'Cliente creado', id_cliente: result.insertId, nombre })
+  })
 })
 
 // POST /api/logbook/dispositivos
-router.post('/dispositivos', async (req, res) => {
+router.post('/dispositivos', (req, res) => {
   const { id_dispositivo, nombre_dispositivo, id_cliente } = req.body
 
   if (!id_dispositivo || !nombre_dispositivo || !id_cliente) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' })
   }
 
-  try {
-    await db.promise().query(
-      'INSERT INTO dispositivos (id_dispositivo, nombre_dispositivo, id_cliente) VALUES (?, ?, ?)',
-      [id_dispositivo, nombre_dispositivo, id_cliente]
-    )
+  const sql = `INSERT INTO dispositivos (id_dispositivo, nombre_dispositivo, id_cliente) VALUES (?, ?, ?)`
+  db.query(sql, [id_dispositivo, nombre_dispositivo, id_cliente], (err, result) => {
+    if (err) {
+      console.error('❌ Error al crear dispositivo:', err)
+      return res.status(500).json({ error: 'Error al crear dispositivo' })
+    }
 
-    res.status(201).json({
-      message: 'Dispositivo creado',
-      id_dispositivo
-    })
-  } catch (err) {
-    console.error('❌ Error al crear dispositivo:', err)
-    res.status(500).json({ error: 'Error al crear dispositivo' })
-  }
+    res.status(201).json({ message: 'Dispositivo creado', id_dispositivo })
+  })
 })
 
 // POST /api/logbook/bitacora
-router.post('/bitacora', async (req, res) => {
+router.post('/bitacora', (req, res) => {
   const {
     id_cliente,
     id_dispositivo,
@@ -92,32 +77,32 @@ router.post('/bitacora', async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios' })
   }
 
-  try {
-    await db.promise().query(
-      `INSERT INTO bitacoras 
-      (id_cliente, id_dispositivo, tecnico, diagnostico, recomendaciones, finalizado) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [id_cliente, id_dispositivo, tecnico, diagnostico, recomendaciones, finalizado]
-    )
+  const sql = `INSERT INTO bitacoras 
+    (id_cliente, id_dispositivo, tecnico, diagnostico, recomendaciones, finalizado) 
+    VALUES (?, ?, ?, ?, ?, ?)`
+
+  db.query(sql, [id_cliente, id_dispositivo, tecnico, diagnostico, recomendaciones, finalizado], (err) => {
+    if (err) {
+      console.error('❌ Error al registrar bitácora:', err)
+      return res.status(500).json({ error: 'Error al registrar bitácora' })
+    }
 
     res.status(201).json({ message: 'Bitácora registrada exitosamente' })
-  } catch (err) {
-    console.error('❌ Error al registrar bitácora:', err)
-    res.status(500).json({ error: 'Error al registrar bitácora' })
-  }
+  })
 })
 
-// GET /api/logbook/tecnicos
-router.get('/tecnicos', async (req, res) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT id_usuario, nombre FROM usuarios WHERE rol_id = 3'
-    )
+// GET /api/logbook/tecnicos - obtener usuarios con rol 'tecnico'
+router.get('/tecnicos', (req, res) => {
+  const sql = 'SELECT id_usuario, nombre FROM usuarios WHERE rol_id = 3'
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('❌ Error al obtener técnicos:', err)
+      return res.status(500).json({ error: 'Error al obtener técnicos' })
+    }
+
     res.json(rows)
-  } catch (err) {
-    console.error('❌ Error al obtener técnicos:', err)
-    res.status(500).json({ error: 'Error al obtener técnicos' })
-  }
+  })
 })
 
 module.exports = router
