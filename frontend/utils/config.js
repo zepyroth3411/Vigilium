@@ -1,6 +1,6 @@
 // utils/config.js
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://vigiliumbd-production.up.railway.app'
 
 // Claves para localStorage (centralizado por si cambian en el futuro)
 export const TOKEN_KEY = 'vigilium_token'
