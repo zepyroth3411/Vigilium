@@ -47,7 +47,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/dashboard" className="flex items-center space-x-2">
           <image
-            src="/logo.png"
+            src="/pet.png"
             alt="Logo Vigilium"
             className="h-8 w-auto"
           />
