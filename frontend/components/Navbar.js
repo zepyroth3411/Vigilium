@@ -45,7 +45,14 @@ export default function Navbar() {
   return (
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary tracking-tight">Vigilium</h1>
+        <Link href="/dashboard" className="flex items-center space-x-2">
+          <image
+            src="/logo.png"
+            alt="Logo Vigilium"
+            className="h-8 w-auto"
+          />
+          <span className="text-2xl font-bold text-primary tracking-tight">Vigilium</span>
+        </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 items-center text-sm font-medium text-gray-700">
@@ -58,7 +65,7 @@ export default function Navbar() {
                 className={`px-3 py-1 rounded-md transition-all duration-300 ${router.pathname === link.href
                   ? 'bg-orange-100 text-primary font-semibold'
                   : 'hover:bg-orange-50 hover:text-primary'
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -71,7 +78,7 @@ export default function Navbar() {
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-300 focus:outline-none ${router.pathname.startsWith('/admin')
                   ? 'bg-orange-100 text-primary font-semibold'
                   : 'hover:bg-orange-50 hover:text-primary'
-                }`}
+                  }`}
               >
                 Administración
               </button>
@@ -122,7 +129,7 @@ export default function Navbar() {
                   className={`block px-3 py-2 rounded-md transition-all duration-300 ${router.pathname === link.href
                     ? 'bg-orange-100 text-primary font-semibold'
                     : 'hover:bg-orange-50 hover:text-primary'
-                  }`}
+                    }`}
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
