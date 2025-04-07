@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { logout } from '@/utils/auth'
 import { jwtDecode } from 'jwt-decode'
 import { TOKEN_KEY } from '@/utils/config'
+import Image from 'next/image'
 
 export default function Navbar() {
   const router = useRouter()
@@ -46,9 +47,11 @@ export default function Navbar() {
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/dashboard" className="flex items-center space-x-2">
-          <image
+          <Image
             src="/pet.png"
             alt="Logo Vigilium"
+            width={32}
+            height={32}
             className="h-8 w-auto"
           />
           <span className="text-2xl font-bold text-primary tracking-tight">Vigilium</span>
