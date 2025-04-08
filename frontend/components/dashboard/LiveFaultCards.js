@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import socket from '@/utils/socket'
+import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 import FaultsModal from './FaultsModal'
 import { API_URL } from '@/utils/config'
 
@@ -45,7 +46,9 @@ export default function LiveFaultsCard() {
         className="bg-white border border-red-400 rounded-xl shadow-sm p-5 cursor-pointer hover:bg-red-50 transition"
         onClick={() => setShowModal(true)}
       >
-        <div className="text-3xl">🚧</div>
+        <div className="text-3xl text-primary">
+          <WrenchScrewdriverIcon className='w-8 h-8'/>
+          </div>
         <p className="text-sm text-gray-600">Fallas técnicas activas</p>
         <p className="text-lg font-semibold text-red-600">{fallas.length}</p>
       </div>

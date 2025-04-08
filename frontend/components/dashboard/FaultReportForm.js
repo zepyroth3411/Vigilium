@@ -1,5 +1,6 @@
 // components/FaultReportForm.js
 import { useState } from 'react'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { API_URL } from '@/utils/config'
 
 export default function FaultReportForm({ dispositivos, tecnico }) {
@@ -51,7 +52,10 @@ export default function FaultReportForm({ dispositivos, tecnico }) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white shadow p-4 rounded space-y-4 max-w-lg mx-auto">
-      <h2 className="text-lg font-bold">📋 Reportar Falla Técnica</h2>
+      <h2 className="text-lg font-bold text-red-700 flex items-center gap-2">
+        <ExclamationTriangleIcon className='w-6 h-6'/> 
+        Reportar Falla Técnica
+        </h2>
 
       <div>
         <label className="block font-semibold">Dispositivo:</label>
@@ -107,9 +111,9 @@ export default function FaultReportForm({ dispositivos, tecnico }) {
       <div className="text-right">
         <button
           type="submit"
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-        >
-          🚨 Reportar Falla
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
+        > <ExclamationTriangleIcon className="w-5 h-5" />
+          Reportar Falla
         </button>
       </div>
     </form>

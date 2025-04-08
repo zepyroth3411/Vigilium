@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { WrenchIcon, CheckCircleIcon, DeviceTabletIcon, UserIcon, ExclamationCircleIcon, DocumentTextIcon, FireIcon } from '@heroicons/react/24/outline'
 import { API_URL, USER_NAME_KEY } from '@/utils/config'
 
 export default function FaultsModal({ fallas, setFallas, onClose }) {
@@ -44,8 +45,9 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
 
         {fallaSeleccionada ? (
           <div className="space-y-4">
-            <p className="font-semibold text-gray-700">
-              🔧 Estás atendiendo la falla del dispositivo <span className="text-blue-600">{fallaSeleccionada.id_dispositivo}</span>
+            <p className="font-semibold text-gray-700 flex items-center gap-2">
+              <WrenchIcon className='w-5 h-5 text-gray-700' />
+              Estás atendiendo la falla del dispositivo <span className="text-blue-600">{fallaSeleccionada.id_dispositivo}</span>
             </p>
 
             <textarea
@@ -58,7 +60,9 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
 
             <div className="flex justify-end gap-3">
               <button onClick={() => setFallaSeleccionada(null)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
-              <button onClick={confirmarAtencion} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">✅ Confirmar</button>
+              <button onClick={confirmarAtencion} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2" >
+                <CheckCircleIcon className='w-5 h-5' />
+                Confirmar</button>
             </div>
           </div>
         ) : (
@@ -68,11 +72,11 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
             ) : (
               <div className="space-y-4">
                 {fallas.map(f => (
-                  <div key={f.id} className="border border-red-200 p-4 rounded-lg shadow-sm bg-white">
-                    <p><strong>📡 Dispositivo:</strong> {f.id_dispositivo}</p>
-                    <p><strong>🧑 Técnico:</strong> {f.tecnico}</p>
-                    <p><strong>⚠️ Tipo:</strong> {f.tipo_falla}</p>
-                    <p><strong>📝 Descripción:</strong> {f.descripcion}</p>
+                  <div key={f.id} className="border border-red-200 p-4 rounded-lg shadow-sm bg-white space-y-1">
+                    <p className="flex items-center gap-2"><DeviceTabletIcon className="w-5 h-5" /><strong>Dispositivo:</strong> {f.id_dispositivo}</p>
+                    <p className="flex items-center gap-2"><UserIcon className="w-5 h-5" /><strong>Técnico:</strong> {f.tecnico}</p>
+                    <p className="flex items-center gap-2"><ExclamationCircleIcon className="w-5 h-5" /><strong>Tipo:</strong> {f.tipo_falla}</p>
+                    <p className="flex items-center gap-2"><DocumentTextIcon className="w-5 h-5" /><strong>Descripción:</strong> {f.descripcion}</p>
                     {f.urgente && <p className="text-red-500 font-bold">🔥 ¡Urgente!</p>}
 
                     <button

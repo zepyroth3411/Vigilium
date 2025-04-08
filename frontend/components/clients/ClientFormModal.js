@@ -1,6 +1,7 @@
 // components/ClientFormModal.js
 import { useState, useEffect } from 'react'
 import Dialog from '@/components/common/Dialog'
+import { UserPlusIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 import { API_URL } from '@/utils/config'
 
 export default function ClientFormModal({ modo, cliente, onClose, onSuccess }) {
@@ -65,8 +66,9 @@ export default function ClientFormModal({ modo, cliente, onClose, onSuccess }) {
 
   return (
     <Dialog onClose={onClose}>
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        {modo === 'crear' ? '➕ Nuevo Cliente' : '✏️ Editar Cliente'}
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        {modo === 'crar' ? <UserPlusIcon className='w-6 h-6 text-primary'/> : <PencilSquareIcon className='w-6 h-6 text-yellow-600'/>}
+        {modo === 'crear' ? ' Nuevo Cliente' : 'Editar Cliente'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-3">

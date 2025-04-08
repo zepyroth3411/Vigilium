@@ -1,3 +1,9 @@
+import {
+  DocumentDuplicateIcon,
+  Cog6ToothIcon,
+  UserPlusIcon
+} from '@heroicons/react/24/outline'
+
 import { useRouter } from 'next/router'
 
 export default function QuickActions() {
@@ -5,19 +11,22 @@ export default function QuickActions() {
 
   const acciones = [
     {
-      titulo: '📄 Ver todos los eventos',
+      titulo: 'Ver todos los eventos',
       descripcion: 'Consulta el historial completo de eventos registrados.',
-      ruta: '/events'
+      ruta: '/events',
+      icono: <DocumentDuplicateIcon className="w-6 h-6 text-primary" />
     },
     {
-      titulo: '🛰️ Configurar dispositivos',
+      titulo: 'Configurar dispositivos',
       descripcion: 'Administra los dispositivos conectados al sistema.',
-      ruta: '/devices'
+      ruta: '/devices',
+      icono: <Cog6ToothIcon className="w-6 h-6 text-primary" />
     },
     {
-      titulo: '➕ Agregar nuevo cliente',
+      titulo: 'Agregar nuevo cliente',
       descripcion: 'Da de alta a un nuevo cliente en la plataforma.',
-      ruta: '/client'
+      ruta: '/client',
+      icono: <UserPlusIcon className="w-6 h-6 text-primary" />
     }
   ]
 
