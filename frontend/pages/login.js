@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Toast from '@/components/Toast'
 import { API_URL, TOKEN_KEY, USER_ID_KEY, USER_NAME_KEY, DASHBOARD_ROUTES } from '@/utils/config'
@@ -53,6 +54,9 @@ export default function Login() {
 
       <div className="min-h-screen flex items-center justify-center bg-[#f5f6fa]">
         <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-md">
+          <Link href="/" className="text-sm text-primary hover:underline block mb-4 text-center">
+            ← Volver al inicio
+          </Link>
           <h1 className="text-2xl font-bold text-center text-primary mb-6">Iniciar sesión en Vigilium</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
