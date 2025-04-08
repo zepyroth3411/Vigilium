@@ -51,7 +51,8 @@ El login es la única ruta pública (/login).
 El componente withAuth protege las rutas privadas.
 
 ## ✍️ Autores
-Desarrollado por el equipo de monitoreo y desarrollo de seguridad de Vigilium.
+Desarrollado por el equipo de monitoreo y desarrollo de seguridad de Vigilium..
+
 Colaboraciones por Sensei @KiraBelak.
 
 
