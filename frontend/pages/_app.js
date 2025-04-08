@@ -7,19 +7,21 @@ import { isAuthenticated } from '@/utils/auth'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter()
-  const noAuthRoutes = ['/login']
-
-  useEffect(() => {
-    const isAuthPage = noAuthRoutes.includes(router.pathname)
-
-    if (!isAuthenticated() && !isAuthPage) {
-      router.push('/login')
-    }
-
-    if (isAuthenticated() && router.pathname === '/login') {
-      router.push('/dashboard')
-    }
-  }, [router.pathname])
+  const noAuthRoutes = ['/', '/login']  // ✅ Incluimos la landing
+  
+    useEffect(() => {
+      const noAuthRoutes = ['/', '/login']  // ✅ definido dentro
+    
+      const isAuthPage = noAuthRoutes.includes(router.pathname)
+    
+      if (!isAuthenticated() && !isAuthPage) {
+        router.push('/login')
+      }
+    
+      if (isAuthenticated() && router.pathname === '/login') {
+        router.push('/dashboard')
+      }
+    }, [router.pathname, router])
 
   const showNavbar = !noAuthRoutes.includes(router.pathname)
 

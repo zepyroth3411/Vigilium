@@ -5,6 +5,7 @@ module.exports = {
   ],
   theme: {
     extend: {
+      scrollBehavior: ['responsive'],
       colors: {
         primary: '#1e3a8a',
         secondary: '#64748b',
