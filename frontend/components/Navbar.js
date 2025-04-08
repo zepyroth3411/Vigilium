@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { logout } from '@/utils/auth'
 import { jwtDecode } from 'jwt-decode'
 import { TOKEN_KEY } from '@/utils/config'
+import {
+  UsersIcon,
+  KeyIcon
+} from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
 export default function Navbar() {
@@ -36,13 +40,35 @@ export default function Navbar() {
   ]
 
   const adminLinks = [
-    ...(userRole === 'admin' ? [
-      { href: '/admin/users', label: '👥 Usuarios' },
-      // { href: '/admin/roles', label: '🔐 Roles' },
-    ] : []),
-    { href: '/admin/password', label: '🔑 Cambiar contraseña' },
+    ...(userRole === 'admin'
+      ? [
+          {
+            href: '/admin/users',
+            label: (
+              <span className="flex items-center gap-2">
+                <UsersIcon className="w-5 h-5" /> Usuarios
+              </span>
+            ),
+          },
+          // {
+          //   href: '/admin/roles',
+          //   label: (
+          //     <span className="flex items-center gap-2">
+          //       <LockClosedIcon className="w-5 h-5" /> Roles
+          //     </span>
+          //   ),
+          // },
+        ]
+      : []),
+    {
+      href: '/admin/password',
+      label: (
+        <span className="flex items-center gap-2">
+          <KeyIcon className="w-5 h-5" /> Cambiar contraseña
+        </span>
+      ),
+    },
   ]
-
   return (
     <nav className="mx-4 mt-4 rounded-xl bg-white shadow-md border border-orange-100">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">

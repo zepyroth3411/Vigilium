@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { WrenchIcon, CheckCircleIcon, DeviceTabletIcon, UserIcon, ExclamationCircleIcon, DocumentTextIcon, FireIcon } from '@heroicons/react/24/outline'
+import { WrenchIcon, CheckCircleIcon, DeviceTabletIcon, UserIcon, ExclamationCircleIcon, DocumentTextIcon, BellAlertIcon,XMarkIcon} from '@heroicons/react/24/outline'
 import { API_URL, USER_NAME_KEY } from '@/utils/config'
 
 export default function FaultsModal({ fallas, setFallas, onClose }) {
@@ -40,8 +40,15 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex items-start justify-center p-6">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl p-6 space-y-6 overflow-y-auto max-h-[90vh] relative">
-        <h2 className="text-xl font-bold text-red-700">🚨 Fallas Técnicas Activas</h2>
-        <button className="absolute top-4 right-6 text-xl text-gray-600 hover:text-black" onClick={onClose}>✖</button>
+        <h2 className="text-xl font-bold text-red-700 flex items-center gap-2">
+          <BellAlertIcon className="w-6 h-6" /> Fallas Técnicas Activas
+        </h2>
+        <button
+          className="absolute top-4 right-6 text-gray-600 hover:text-black"
+          onClick={onClose}
+        >
+          <XMarkIcon className="w-6 h-6" />
+        </button>
 
         {fallaSeleccionada ? (
           <div className="space-y-4">
@@ -77,13 +84,17 @@ export default function FaultsModal({ fallas, setFallas, onClose }) {
                     <p className="flex items-center gap-2"><UserIcon className="w-5 h-5" /><strong>Técnico:</strong> {f.tecnico}</p>
                     <p className="flex items-center gap-2"><ExclamationCircleIcon className="w-5 h-5" /><strong>Tipo:</strong> {f.tipo_falla}</p>
                     <p className="flex items-center gap-2"><DocumentTextIcon className="w-5 h-5" /><strong>Descripción:</strong> {f.descripcion}</p>
-                    {f.urgente && <p className="text-red-500 font-bold">🔥 ¡Urgente!</p>}
+                    {f.urgente && (
+                      <p className="text-red-500 font-bold flex items-center gap-2">
+                        <ExclamationCircleIcon className="w-5 h-5" /> ¡Urgente!
+                      </p>
+                    )}
 
                     <button
                       onClick={() => setFallaSeleccionada(f)}
-                      className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                      className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 flex items-center gap-2"
                     >
-                      🛠️ Atender falla
+                      <WrenchIcon className="w-5 h-5" /> Atender falla
                     </button>
                   </div>
                 ))}

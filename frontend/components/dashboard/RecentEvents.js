@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import {
+  ClipboardDocumentListIcon
+} from '@heroicons/react/24/outline'
 import { API_URL } from '@/utils/config'
 
 export default function RecentEvents() {
@@ -31,7 +34,9 @@ export default function RecentEvents() {
 
   return (
     <div className="bg-white border rounded-xl shadow-sm p-6 mt-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">📋 Últimos eventos atendidos</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <ClipboardDocumentListIcon className="w-5 h-5" /> Últimos eventos atendidos
+      </h2>
 
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm text-left border rounded-md overflow-hidden">
