@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import AccessDenied from '@/components/common/AccessDenied'
 import { tienePermiso } from '@/utils/permissions'
+import { KeyIcon } from '@heroicons/react/24/outline'
 import { API_URL, TOKEN_KEY, USER_ID_KEY } from '@/utils/config'
 
 export default function CambiarPassword() {
@@ -71,12 +72,13 @@ export default function CambiarPassword() {
 
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow">
-      <h2 className="text-2xl font-bold mb-4">🔑 Cambiar contraseña</h2>
+      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+        <KeyIcon className="w-6 h-6 text-primary" /> Cambiar contraseña
+      </h2>
 
       {mensaje && (
-        <div className={`mb-4 p-3 rounded text-sm ${
-          mensaje.tipo === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-        }`}>
+        <div className={`mb-4 p-3 rounded text-sm ${mensaje.tipo === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+          }`}>
           {mensaje.texto}
         </div>
       )}

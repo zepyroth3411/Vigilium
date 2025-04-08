@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { DocumentTextIcon } from '@heroicons/react/24/outline'
 import { API_URL } from '@/utils/config'
 
 export default function BitacoraServicio() {
@@ -240,8 +241,8 @@ export default function BitacoraServicio() {
         </label>
 
         <div className="flex justify-end">
-          <button onClick={generarPDF} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            📄 Generar PDF
+          <button onClick={generarPDF} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
+            <DocumentTextIcon className="w-5 h-5" /> Generar PDF
           </button>
         </div>
       </div>

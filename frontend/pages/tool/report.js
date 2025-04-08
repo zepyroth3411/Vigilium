@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { jwtDecode } from 'jwt-decode'
 import { API_URL, TOKEN_KEY } from '@/utils/config'
+import { WrenchIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import Toast from '@/components/Toast'
 
 export default function ReportarFalla() {
@@ -87,8 +88,9 @@ export default function ReportarFalla() {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      <h1 className="text-2xl font-bold text-gray-800">🚧 Reportar Falla Técnica</h1>
+      <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <WrenchIcon className="w-6 h-6 text-red-600" /> Reportar Falla Técnica
+      </h1>
 
       <div className="bg-white shadow rounded-xl p-6 space-y-4">
         <div>
@@ -143,11 +145,8 @@ export default function ReportarFalla() {
         </label>
 
         <div className="flex justify-end">
-          <button
-            onClick={enviarReporte}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            🚨 Enviar Reporte
+          <button onClick={enviarReporte} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex items-center gap-2">
+            <ExclamationCircleIcon className="w-5 h-5" /> Enviar Reporte
           </button>
         </div>
       </div>

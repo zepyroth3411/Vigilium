@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import AccessDenied from '@/components/common/AccessDenied'
 import { tienePermiso } from '@/utils/permissions'
 import ClientFormModal from '@/components/clients/ClientFormModal'
+import { UserPlusIcon } from '@heroicons/react/24/outline'
 import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function Clientes() {
@@ -67,9 +68,9 @@ export default function Clientes() {
               setModoEdicion(null)
               setMostrarFormulario(true)
             }}
-            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition"
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition flex items-center gap-2"
           >
-            ➕ Añadir Cliente
+            <UserPlusIcon className="w-5 h-5" /> Añadir Cliente
           </button>
         </div>
       )}

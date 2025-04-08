@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { UserGroupIcon } from '@heroicons/react/24/outline'
 import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function UserManagement() {
@@ -166,7 +167,9 @@ export default function UserManagement() {
 
   return (
     <div className="p-6 min-h-screen bg-[#f9fafb] space-y-10 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-primary">👥 Gestión de Usuarios</h1>
+      <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+        <UserGroupIcon className="w-7 h-7" /> Gestión de Usuarios
+      </h1>
       <p className="text-gray-600">Aquí puedes ver, crear y administrar los usuarios del sistema</p>
 
       <section className="bg-white p-6 rounded-xl shadow-sm border space-y-4">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { UserGroupIcon, LockClosedIcon, KeyIcon } from '@heroicons/react/24/outline'
 import { API_URL, TOKEN_KEY } from '@/utils/config'
 
 export default function AdminPanel() {
@@ -36,7 +37,9 @@ export default function AdminPanel() {
 
       {/* 👥 Gestión de Usuarios */}
       <section className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">👥 Gestión de Usuarios</h2>
+        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-2">
+          <UserGroupIcon className="w-5 h-5" /> Gestión de Usuarios
+        </h2>
         {error && <p className="text-red-600">{error}</p>}
         <table className="w-full text-sm text-left border border-gray-200 rounded-md overflow-hidden">
           <thead className="bg-gray-100">
@@ -60,7 +63,9 @@ export default function AdminPanel() {
 
       {/* 🔐 Roles y Permisos */}
       <section className="bg-white p-6 rounded-xl shadow-sm border space-y-2">
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">🔐 Roles y Accesos</h2>
+        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-2">
+          <LockClosedIcon className="w-5 h-5" /> Roles y Accesos
+        </h2>
         <ul className="text-sm text-gray-700 list-disc list-inside">
           <li><strong>admin</strong>: acceso total a todas las secciones, puede crear y modificar usuarios.</li>
           <li><strong>monitorista</strong>: acceso solo a dashboard, eventos, dispositivos y clientes.</li>
@@ -70,7 +75,9 @@ export default function AdminPanel() {
 
       {/* 🔑 Cambiar Contraseña */}
       <section className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">🔑 Cambiar Contraseña</h2>
+        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 flex items-center gap-2">
+          <KeyIcon className="w-5 h-5" /> Cambiar Contraseña
+        </h2>
         <form
           onSubmit={(e) => {
             e.preventDefault()
