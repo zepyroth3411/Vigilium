@@ -12,12 +12,12 @@
 - `localStorage` – manejo del token JWT
 
 ## 📁 Estructura del Proyecto
-├── components/ # Componentes reutilizables (Navbar, Cards, Forms, etc.) 
-├── pages/ # Rutas del frontend (login, dashboard, etc.) 
-├── public/ # Archivos estáticos (logo, iconos) 
-├── styles/ # Archivos CSS globales (Tailwind) 
-├── utils/ # Configuración global (auth, API URL, etc.) 
-└── .env.local # Variables de entorno
+- ├── components/ # Componentes reutilizables (Navbar, Cards, Forms, etc.) 
+- ├── pages/ # Rutas del frontend (login, dashboard, etc.) 
+- ├── public/ # Archivos estáticos (logo, iconos) 
+- ├── styles/ # Archivos CSS globales (Tailwind) 
+- ├── utils/ # Configuración global (auth, API URL, etc.) 
+- └── .env.local # Variables de entorno
 ## 🧠 Funcionalidades principales
 
 - **Autenticación con JWT**
