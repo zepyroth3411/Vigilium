@@ -1,40 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Vigilium Frontend
 
-## Getting Started
+**Vigilium** es un sistema inteligente de monitoreo para dispositivos de seguridad y eventos críticos. Este repositorio contiene el frontend de la aplicación, desarrollado con **Next.js**, **Tailwind CSS** y **Heroicons**. También se utiliza **Cloudinary** para optimizar las imágenes de la landing page.
 
-First, run the development server:
+## 🚀 Tecnologías Utilizadas
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Heroicons](https://heroicons.com/)
+- [Cloudinary](https://cloudinary.com/)
+- [Framer Motion](https://www.framer.com/motion/) – para animaciones fluidas
+- `localStorage` – manejo del token JWT
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Estructura del Proyecto
+- ├── components/ # Componentes reutilizables (Navbar, Cards, Forms, etc.) 
+- ├── pages/ # Rutas del frontend (login, dashboard, etc.) 
+- ├── public/ # Archivos estáticos (logo, iconos) 
+- ├── styles/ # Archivos CSS globales (Tailwind) 
+- ├── utils/ # Configuración global (auth, API URL, etc.) 
+- └── .env.local # Variables de entorno
+## 🧠 Funcionalidades principales
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- **Autenticación con JWT**
+- **Redirección automática según rol** (`admin`, `técnico`, `monitorista`, `supervisor`)
+- **Dashboard dinámico** con KPIs y alertas
+- **Landing informativa** con misión, visión, valores e imágenes en Cloudinary
+- **Gestión de usuarios, dispositivos, eventos, clientes y fallas**
+- **Responsivo y optimizado para móvil**
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## 🌐 Variables de entorno
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+Crea un archivo `.env.local` en la raíz del proyecto:
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## env
+NEXT_PUBLIC_API_URL=https://vigiliumbd-production.up.railway.app
+Esta variable apunta al backend en Railway.
 
-## Learn More
+## ⚙️ Comandos disponibles
+Comando	Descripción
+npm install	Instala dependencias
+npm run dev	Inicia el entorno de desarrollo (localhost:3000)
+npm run build	Compila para producción
+npm run start	Inicia el servidor en producción
 
-To learn more about Next.js, take a look at the following resources:
+## 🖼️ Imágenes
+Todas las imágenes de la landing page se cargan desde Cloudinary para optimizar su tamaño y velocidad. Se usan componentes <Image /> de Next.js para mejorar el rendimiento.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+## 🔐 Control de Acceso
+El sistema restringe rutas según el rol del usuario.
+El login es la única ruta pública (/login).
+El componente withAuth protege las rutas privadas.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✍️ Autores
+Desarrollado por el equipo de monitoreo y desarrollo de seguridad de Vigilium..
 
-## Deploy on Vercel
+Colaboraciones por Sensei @KiraBelak.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+
+
+
+
+
